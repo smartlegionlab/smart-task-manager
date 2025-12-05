@@ -443,9 +443,11 @@ class MainWindow(QWidget):
         footer_layout = QVBoxLayout()
         footer_layout.setSpacing(5)
 
-        self.copyright_label = QLabel('Copyright © 2025, Alexander Suvorov. All rights reserved.')
+        copyright_text = 'Copyright © 2025, <a href="https://github.com/smartlegionlab" style="color: #2a82da; text-decoration: none;">Alexander Suvorov</a>. All rights reserved.'
+        self.copyright_label = QLabel(copyright_text)
         self.copyright_label.setAlignment(Qt.AlignCenter)
-        self.copyright_label.setStyleSheet("color: #888; font-size: 10px;")
+        self.copyright_label.setStyleSheet("color: #888; font-size: 16px;")
+        self.copyright_label.setOpenExternalLinks(True)
         footer_layout.addWidget(self.copyright_label)
 
         self.main_layout.addLayout(footer_layout)
