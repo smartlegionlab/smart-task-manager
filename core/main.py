@@ -776,13 +776,15 @@ class MainWindow(QWidget):
             QMessageBox.warning(self, "Error", "Task not found")
             return
 
-        reply = QMessageBox.question(
-            self,
-            'Confirm Deletion',
-            f'Delete task:\n<b>{task.title}</b>?',
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle('Confirm Deletion')
+        msg_box.setText(f'Delete task:\n<b>{task.title}</b>?')
+        msg_box.setTextFormat(Qt.RichText)
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.No)
+        msg_box.setIcon(QMessageBox.Question)
+
+        reply = msg_box.exec_()
 
         if reply == QMessageBox.Yes:
             self.todo_manager.delete_task(task.id)
