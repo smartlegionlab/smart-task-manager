@@ -455,6 +455,7 @@ class MainWindow(QWidget):
 
     def _init(self):
         self.all_tasks = list(self.todo_manager.tasks.values())
+        self.update_stats()
         self.apply_filters()
 
     def update_stats(self):
@@ -637,10 +638,6 @@ class MainWindow(QWidget):
         for task in filtered_tasks:
             self.add_item(task)
 
-        visible_count = len(filtered_tasks)
-        total_count = len(self.all_tasks)
-        self.stats_label.setText(f"{visible_count} of {total_count} tasks")
-
     def reset_filters(self):
         self.search_input.clear()
         self.status_all_radio.setChecked(True)
@@ -763,6 +760,7 @@ class MainWindow(QWidget):
                     break
 
             self.apply_filters()
+            self.update_stats()
 
             QMessageBox.information(
                 self,
@@ -788,6 +786,7 @@ class MainWindow(QWidget):
             self.todo_manager.delete_task(task.id)
             self.all_tasks = [t for t in self.all_tasks if t.id != task.id]
             self.apply_filters()
+            self.update_stats()
             QMessageBox.information(
                 self,
                 'Deleted',
@@ -862,6 +861,7 @@ class MainWindow(QWidget):
             self.todo_manager.add_task(task)
             self.all_tasks.append(task)
             self.apply_filters()
+            self.update_stats()
 
             QMessageBox.information(
                 self,
@@ -891,6 +891,7 @@ class MainWindow(QWidget):
             self.todo_manager.clear_completed()
             self.all_tasks = [t for t in self.all_tasks if not t.completed]
             self.apply_filters()
+            self.update_stats()
             QMessageBox.information(
                 self,
                 'Cleared',
