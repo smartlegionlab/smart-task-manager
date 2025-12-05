@@ -54,7 +54,7 @@ class TaskManager:
     def _load_data(self) -> Dict[str, Task]:
         if os.path.isfile(self.filename):
             try:
-                with open(self.filename, 'r') as f:
+                with open(self.filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     return {task_id: Task.from_dict(task_data)
                             for task_id, task_data in data.items()}
@@ -64,6 +64,10 @@ class TaskManager:
             return {}
 
     def _write_data(self):
-        with open(self.filename, 'w') as f:
+        with open(self.filename, 'w', encoding='utf-8') as f:
             json.dump({task_id: task.to_dict()
-                       for task_id, task in self.tasks.items()}, f, indent=4)
+                       for task_id, task in self.tasks.items()},
+                      f,
+                      indent=4,
+                      ensure_ascii=False,
+                      sort_keys=True)
