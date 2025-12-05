@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.0.0</sup>
+# Smart Task Manager <sup>v1.0.1</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an 
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
