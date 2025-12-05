@@ -622,23 +622,24 @@ class MainWindow(QWidget):
 
         menu = QMenu()
 
+        view_action = QAction("👁 View Details")
+        view_action.triggered.connect(lambda: self.view_task_by_id(task_id))
+        menu.addAction(view_action)
+
         mark_complete_action = QAction("✅ Mark as Complete" if not task.completed else "⏳ Mark as Pending")
         mark_complete_action.triggered.connect(lambda: self.toggle_task_status_by_id(task_id))
+        menu.addAction(mark_complete_action)
+
+        menu.addSeparator()
 
         edit_action = QAction("✏️ Edit Task")
         edit_action.triggered.connect(lambda: self.edit_task_by_id(task_id))
+        menu.addAction(edit_action)
 
-        view_action = QAction("👁 View Details")
-        view_action.triggered.connect(lambda: self.view_task_by_id(task_id))
+        menu.addSeparator()
 
         delete_action = QAction("🗑️ Delete Task")
         delete_action.triggered.connect(lambda: self.delete_task_by_id(task_id))
-
-        menu.addAction(mark_complete_action)
-        menu.addSeparator()
-        menu.addAction(view_action)
-        menu.addAction(edit_action)
-        menu.addSeparator()
         menu.addAction(delete_action)
 
         menu.exec_(self.table_widget.viewport().mapToGlobal(position))
