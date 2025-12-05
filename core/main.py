@@ -336,19 +336,19 @@ class MainWindow(QWidget):
         self.table_widget.insertRow(row_position)
 
         title_item = QTableWidgetItem(task.title)
+        title_item.setToolTip(task.description)
         if task.completed:
             title_item.setForeground(QColor(100, 100, 100))
             font = title_item.font()
             font.setStrikeOut(True)
             title_item.setFont(font)
-        title_item.setToolTip(task.description)
         self.table_widget.setItem(row_position, 0, title_item)
 
         priority_combo = QComboBox()
         priority_combo.addItems(["🚨 High", "⚠️ Medium", "📋 Low"])
         priority_combo.setCurrentIndex(task.priority - 1)
         priority_combo.currentIndexChanged.connect(
-            lambda index, t=task: self.change_priority(t, index + 1)
+            lambda index, t_id=task.id: self.change_priority_by_id(t_id, index + 1)
         )
         self.table_widget.setCellWidget(row_position, 1, priority_combo)
 
@@ -370,7 +370,8 @@ class MainWindow(QWidget):
                 color: white;
             }
         """)
-        status_button.clicked.connect(lambda checked, t=task: self.toggle_task_status(t))
+        status_button.clicked.connect(lambda checked, t_id=task.id: self.toggle_task_status_by_id(t_id))
+        status_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 2, status_button)
 
         due_text = task.due_date if task.due_date else "No due date"
@@ -397,7 +398,8 @@ class MainWindow(QWidget):
                 background-color: #1a72ca;
             }
         """)
-        view_button.clicked.connect(lambda checked, t=task: self.view_task(t))
+        view_button.clicked.connect(lambda checked, t_id=task.id: self.view_task_by_id(t_id))
+        view_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 4, view_button)
 
         edit_button = QPushButton("✏️ Edit")
@@ -413,7 +415,8 @@ class MainWindow(QWidget):
                 background-color: #e68900;
             }
         """)
-        edit_button.clicked.connect(lambda checked, t=task: self.edit_task(t))
+        edit_button.clicked.connect(lambda checked, t_id=task.id: self.edit_task_by_id(t_id))
+        edit_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 5, edit_button)
 
         delete_button = QPushButton("🗑️")
@@ -431,75 +434,107 @@ class MainWindow(QWidget):
                 background-color: #ca1a1a;
             }
         """)
-        delete_button.clicked.connect(lambda checked, t=task: self.delete_task(t))
+        delete_button.clicked.connect(lambda checked, t_id=task.id: self.delete_task_by_id(t_id))
+        delete_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 6, delete_button)
 
         self.update_stats()
 
-    def change_priority(self, task: Task, new_priority: int):
-        updated_task = Task(
-            id=task.id,
-            title=task.title,
-            description=task.description,
-            priority=new_priority,
-            completed=task.completed,
-            created_at=task.created_at,
-            due_date=task.due_date
-        )
-
-        self.todo_manager.tasks[task.id] = updated_task
-        self.todo_manager._write_data()
-
-        self.refresh_task_row(updated_task)
-
     def refresh_task_row(self, task: Task):
         for row in range(self.table_widget.rowCount()):
-            title_item = self.table_widget.item(row, 0)
-            if title_item and title_item.text() == task.title:
-                priority_combo = self.table_widget.cellWidget(row, 1)
-                if isinstance(priority_combo, QComboBox):
-                    priority_combo.setCurrentIndex(task.priority - 1)
+            for col in [2, 4, 5, 6]:
+                widget = self.table_widget.cellWidget(row, col)
+                if widget and hasattr(widget, 'task_id') and widget.task_id == task.id:
+                    title_item = self.table_widget.item(row, 0)
+                    if title_item:
+                        title_item.setText(task.title)
+                        title_item.setToolTip(task.description)
 
-                status_button = self.table_widget.cellWidget(row, 2)
-                if isinstance(status_button, QPushButton):
-                    status_button.setText("✅ Completed" if task.completed else "⏳ Pending")
-                    status_button.setChecked(task.completed)
+                        if task.completed:
+                            title_item.setForeground(QColor(100, 100, 100))
+                            font = title_item.font()
+                            font.setStrikeOut(True)
+                            title_item.setFont(font)
+                        else:
+                            title_item.setForeground(QColor(255, 255, 255))
+                            font = title_item.font()
+                            font.setStrikeOut(False)
+                            title_item.setFont(font)
 
-                due_text = task.due_date if task.due_date else "No due date"
-                due_item = self.table_widget.item(row, 3)
-                if due_item:
-                    due_item.setText(due_text)
+                    priority_combo = self.table_widget.cellWidget(row, 1)
+                    if isinstance(priority_combo, QComboBox):
+                        priority_combo.blockSignals(True)
+                        priority_combo.setCurrentIndex(task.priority - 1)
+                        priority_combo.blockSignals(False)
 
-                    due_item.setForeground(QColor(255, 255, 255))
-                    if task.due_date and not task.completed:
-                        due_date = datetime.fromisoformat(task.due_date).date()
-                        if due_date < datetime.now().date():
-                            due_item.setForeground(QColor(255, 100, 100))
+                    status_button = self.table_widget.cellWidget(row, 2)
+                    if isinstance(status_button, QPushButton):
+                        status_button.setText("✅ Completed" if task.completed else "⏳ Pending")
+                        status_button.setChecked(task.completed)
 
-                if task.completed:
-                    title_item.setForeground(QColor(100, 100, 100))
-                    font = title_item.font()
-                    font.setStrikeOut(True)
-                    title_item.setFont(font)
-                else:
-                    title_item.setForeground(QColor(255, 255, 255))
-                    font = title_item.font()
-                    font.setStrikeOut(False)
-                    title_item.setFont(font)
+                    due_text = task.due_date if task.due_date else "No due date"
+                    due_item = self.table_widget.item(row, 3)
+                    if due_item:
+                        due_item.setText(due_text)
+                        due_item.setForeground(QColor(255, 255, 255))
+                        if task.due_date and not task.completed:
+                            due_date = datetime.fromisoformat(task.due_date).date()
+                            if due_date < datetime.now().date():
+                                due_item.setForeground(QColor(255, 100, 100))
 
-                break
+                    for col in [2, 4, 5, 6]:
+                        widget = self.table_widget.cellWidget(row, col)
+                        if widget:
+                            widget.task_id = task.id
+
+                    return
+
+    def change_priority_by_id(self, task_id: str, new_priority: int):
+        task = self.todo_manager.get_task(task_id)
+        if task:
+            updated_task = Task(
+                id=task.id,
+                title=task.title,
+                description=task.description,
+                priority=new_priority,
+                completed=task.completed,
+                created_at=task.created_at,
+                due_date=task.due_date
+            )
+
+            self.todo_manager.tasks[task.id] = updated_task
+            self.todo_manager.write_data()
+            self.refresh_task_row(updated_task)
+
+    def change_priority(self, task: Task, new_priority: int):
+        self.change_priority_by_id(task.id, new_priority)
+
+    def toggle_task_status_by_id(self, task_id: str):
+        task = self.todo_manager.get_task(task_id)
+        if task:
+            task.toggle_complete()
+            self.todo_manager.write_data()
+            self.refresh_task_row(task)
+            self.update_stats()
 
     def toggle_task_status(self, task: Task):
-        task.toggle_complete()
-        self.todo_manager._write_data()
-        self.refresh_task_row(task)
-        self.update_stats()
+        self.toggle_task_status_by_id(task.id)
+
+    def view_task_by_id(self, task_id: str):
+        task = self.todo_manager.get_task(task_id)
+        if task:
+            dialog = TaskDisplayDialog(self, task, on_edit_callback=lambda t: self.edit_task_by_id(t.id))
+            dialog.exec_()
 
     def view_task(self, task: Task):
-        dialog = TaskDisplayDialog(self, task, on_edit_callback=self.edit_task)
-        dialog.exec_()
+        self.view_task_by_id(task.id)
 
-    def edit_task(self, task: Task):
+    def edit_task_by_id(self, task_id: str):
+        task = self.todo_manager.get_task(task_id)
+        if not task:
+            QMessageBox.warning(self, "Error", "Task not found")
+            return
+
         dialog = TaskInputDialog(self, task)
         if dialog.exec_() == QDialog.Accepted:
             inputs = dialog.get_inputs()
@@ -523,8 +558,7 @@ class MainWindow(QWidget):
             )
 
             self.todo_manager.tasks[task.id] = updated_task
-            self.todo_manager._write_data()
-
+            self.todo_manager.write_data()
             self.refresh_task_row(updated_task)
 
             QMessageBox.information(
@@ -533,7 +567,15 @@ class MainWindow(QWidget):
                 f'Task "{updated_task.title}" has been updated.'
             )
 
-    def delete_task(self, task: Task):
+    def edit_task(self, task: Task):
+        self.edit_task_by_id(task.id)
+
+    def delete_task_by_id(self, task_id: str):
+        task = self.todo_manager.get_task(task_id)
+        if not task:
+            QMessageBox.warning(self, "Error", "Task not found")
+            return
+
         reply = QMessageBox.question(
             self,
             'Confirm Deletion',
@@ -551,38 +593,41 @@ class MainWindow(QWidget):
                 f'Task "{task.title}" has been deleted.'
             )
 
+    def delete_task(self, task: Task):
+        self.delete_task_by_id(task.id)
+
     def show_context_menu(self, position):
         row = self.table_widget.rowAt(position.y())
         if row < 0:
             return
 
-        title_item = self.table_widget.item(row, 0)
-        if not title_item:
-            return
-
-        task_title = title_item.text()
-        task = None
-        for t in self.todo_manager.tasks.values():
-            if t.title == task_title:
-                task = t
+        task_id = None
+        for col in [2, 4, 5, 6]:
+            widget = self.table_widget.cellWidget(row, col)
+            if widget and hasattr(widget, 'task_id'):
+                task_id = widget.task_id
                 break
 
+        if not task_id:
+            return
+
+        task = self.todo_manager.get_task(task_id)
         if not task:
             return
 
         menu = QMenu()
 
         mark_complete_action = QAction("✅ Mark as Complete" if not task.completed else "⏳ Mark as Pending")
-        mark_complete_action.triggered.connect(lambda: self.toggle_task_status(task))
+        mark_complete_action.triggered.connect(lambda: self.toggle_task_status_by_id(task_id))
 
         edit_action = QAction("✏️ Edit Task")
-        edit_action.triggered.connect(lambda: self.edit_task(task))
+        edit_action.triggered.connect(lambda: self.edit_task_by_id(task_id))
 
         view_action = QAction("👁 View Details")
-        view_action.triggered.connect(lambda: self.view_task(task))
+        view_action.triggered.connect(lambda: self.view_task_by_id(task_id))
 
         delete_action = QAction("🗑️ Delete Task")
-        delete_action.triggered.connect(lambda: self.delete_task(task))
+        delete_action.triggered.connect(lambda: self.delete_task_by_id(task_id))
 
         menu.addAction(mark_complete_action)
         menu.addSeparator()
@@ -616,7 +661,6 @@ class MainWindow(QWidget):
             )
 
             self.todo_manager.add_task(task)
-
             self.add_item(task)
 
             QMessageBox.information(

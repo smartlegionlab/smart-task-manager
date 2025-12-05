@@ -10,7 +10,7 @@ class TaskManager:
 
     def __init__(self, filename: str = '~/.todos.json'):
         self.filename = os.path.expanduser(filename)
-        self.tasks = self._load_data()
+        self.tasks = self.load_data()
 
     @property
     def count(self) -> int:
@@ -22,7 +22,7 @@ class TaskManager:
 
     def add_task(self, task: Task):
         self.tasks[task.id] = task
-        self._write_data()
+        self.write_data()
 
     def get_task(self, task_id: str) -> Optional[Task]:
         return self.tasks.get(task_id)
@@ -30,7 +30,7 @@ class TaskManager:
     def delete_task(self, task_id: str):
         if task_id in self.tasks:
             del self.tasks[task_id]
-            self._write_data()
+            self.write_data()
         else:
             raise KeyError("Task not found.")
 
@@ -39,11 +39,11 @@ class TaskManager:
         for task_id in completed_ids:
             del self.tasks[task_id]
         if completed_ids:
-            self._write_data()
+            self.write_data()
 
     def clear_all(self):
         self.tasks = {}
-        self._write_data()
+        self.write_data()
 
     def get_tasks_by_priority(self) -> Dict[int, list]:
         grouped = {1: [], 2: [], 3: []}
@@ -51,7 +51,7 @@ class TaskManager:
             grouped[task.priority].append(task)
         return grouped
 
-    def _load_data(self) -> Dict[str, Task]:
+    def load_data(self) -> Dict[str, Task]:
         if os.path.isfile(self.filename):
             try:
                 with open(self.filename, 'r', encoding='utf-8') as f:
@@ -63,7 +63,7 @@ class TaskManager:
         else:
             return {}
 
-    def _write_data(self):
+    def write_data(self):
         with open(self.filename, 'w', encoding='utf-8') as f:
             json.dump({task_id: task.to_dict()
                        for task_id, task in self.tasks.items()},
