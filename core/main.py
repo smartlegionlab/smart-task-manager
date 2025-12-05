@@ -932,6 +932,12 @@ class MainWindow(QWidget):
             '<li>📋 Low - Nice-to-have tasks (Green)</li>'
             '</ul>'
             '<p>Tasks are automatically saved to ~/.todos.json</p>'
+            '<hr>'
+            '<p><b>Links:</b></p>'
+            '<p>'
+            '📂 <a href="https://github.com/smartlegionlab/smart-task-manager" style="color: #2a82da;">GitHub Repository</a><br>'
+            '🐛 <a href="https://github.com/smartlegionlab/smart-task-manager/issues" style="color: #2a82da;">Report Issues</a>'
+            '</p>'
         )
 
     def closeEvent(self, event):
