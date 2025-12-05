@@ -1,13 +1,13 @@
 # Copyright (©) 2025, Alexander Suvorov. All rights reserved.
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QMessageBox,
     QLineEdit, QDialog, QTableWidget, QTableWidgetItem, QFrame,
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
-    QMenu, QAction
+    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup
 )
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt, QDate
@@ -192,17 +192,18 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.0.1')
+        self.setWindowTitle('Smart Task Manager v1.0.2')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
+        self.all_tasks: List[Task] = []
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setSpacing(15)
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.0.1</sup>')
+        self.label_logo = QLabel('Smart Task Manager <sup>v1.0.2</sup>')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -217,6 +218,139 @@ class MainWindow(QWidget):
         header_layout.addWidget(self.stats_label)
 
         self.main_layout.addLayout(header_layout)
+
+        search_group = QGroupBox("Search & Filter")
+        search_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #444;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
+        search_layout = QGridLayout()
+        search_layout.setSpacing(10)
+
+        self.search_label = QLabel('🔍 Search:')
+        search_layout.addWidget(self.search_label, 0, 0)
+
+        self.search_input = QLineEdit(self)
+        self.search_input.setPlaceholderText("Search in title and description...")
+        self.search_input.textChanged.connect(self.apply_filters)
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #555;
+                border-radius: 4px;
+                background-color: #2a2a2a;
+                color: white;
+            }
+            QLineEdit:focus {
+                border: 1px solid #2a82da;
+            }
+        """)
+        search_layout.addWidget(self.search_input, 0, 1, 1, 3)
+
+        self.status_label = QLabel('Status:')
+        search_layout.addWidget(self.status_label, 1, 0)
+
+        self.status_all_radio = QRadioButton("All")
+        self.status_all_radio.setChecked(True)
+        self.status_pending_radio = QRadioButton("⏳ Pending")
+        self.status_completed_radio = QRadioButton("✅ Completed")
+
+        self.status_group = QButtonGroup(self)
+        self.status_group.addButton(self.status_all_radio)
+        self.status_group.addButton(self.status_pending_radio)
+        self.status_group.addButton(self.status_completed_radio)
+
+        status_layout = QHBoxLayout()
+        status_layout.addWidget(self.status_all_radio)
+        status_layout.addWidget(self.status_pending_radio)
+        status_layout.addWidget(self.status_completed_radio)
+        status_layout.addStretch()
+
+        search_layout.addLayout(status_layout, 1, 1, 1, 3)
+
+        self.priority_label = QLabel('Priority:')
+        search_layout.addWidget(self.priority_label, 2, 0)
+
+        self.priority_high_check = QCheckBox("🚨 High")
+        self.priority_medium_check = QCheckBox("⚠️ Medium")
+        self.priority_low_check = QCheckBox("📋 Low")
+
+        self.priority_high_check.setChecked(True)
+        self.priority_medium_check.setChecked(True)
+        self.priority_low_check.setChecked(True)
+
+        priority_layout = QHBoxLayout()
+        priority_layout.addWidget(self.priority_high_check)
+        priority_layout.addWidget(self.priority_medium_check)
+        priority_layout.addWidget(self.priority_low_check)
+        priority_layout.addStretch()
+
+        search_layout.addLayout(priority_layout, 2, 1, 1, 3)
+
+        self.date_label = QLabel('Due Date:')
+        search_layout.addWidget(self.date_label, 3, 0)
+
+        self.date_all_radio = QRadioButton("All")
+        self.date_all_radio.setChecked(True)
+        self.date_overdue_radio = QRadioButton("Overdue")
+        self.date_today_radio = QRadioButton("Today")
+        self.date_future_radio = QRadioButton("Future")
+
+        self.date_group = QButtonGroup(self)
+        self.date_group.addButton(self.date_all_radio)
+        self.date_group.addButton(self.date_overdue_radio)
+        self.date_group.addButton(self.date_today_radio)
+        self.date_group.addButton(self.date_future_radio)
+
+        date_layout = QHBoxLayout()
+        date_layout.addWidget(self.date_all_radio)
+        date_layout.addWidget(self.date_overdue_radio)
+        date_layout.addWidget(self.date_today_radio)
+        date_layout.addWidget(self.date_future_radio)
+        date_layout.addStretch()
+
+        search_layout.addLayout(date_layout, 3, 1, 1, 3)
+
+        self.reset_filters_btn = QPushButton("🗑️ Reset Filters")
+        self.reset_filters_btn.clicked.connect(self.reset_filters)
+        self.reset_filters_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #555;
+                color: white;
+                border-radius: 4px;
+                padding: 6px 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #666;
+            }
+        """)
+        search_layout.addWidget(self.reset_filters_btn, 4, 3)
+
+        self.status_all_radio.toggled.connect(self.apply_filters)
+        self.status_pending_radio.toggled.connect(self.apply_filters)
+        self.status_completed_radio.toggled.connect(self.apply_filters)
+
+        self.priority_high_check.stateChanged.connect(self.apply_filters)
+        self.priority_medium_check.stateChanged.connect(self.apply_filters)
+        self.priority_low_check.stateChanged.connect(self.apply_filters)
+
+        self.date_all_radio.toggled.connect(self.apply_filters)
+        self.date_overdue_radio.toggled.connect(self.apply_filters)
+        self.date_today_radio.toggled.connect(self.apply_filters)
+        self.date_future_radio.toggled.connect(self.apply_filters)
+
+        search_group.setLayout(search_layout)
+        self.main_layout.addWidget(search_group)
 
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(7)
@@ -320,14 +454,12 @@ class MainWindow(QWidget):
         self._init()
 
     def _init(self):
-        self.table_widget.setRowCount(0)
-        self.update_stats()
-        for task in self.todo_manager.tasks.values():
-            self.add_item(task)
+        self.all_tasks = list(self.todo_manager.tasks.values())
+        self.apply_filters()
 
     def update_stats(self):
-        total = self.todo_manager.count
-        completed = self.todo_manager.completed_count
+        total = len(self.all_tasks)
+        completed = sum(1 for task in self.all_tasks if task.completed)
         pending = total - completed
         self.stats_label.setText(f"{total} tasks ({completed} completed, {pending} pending)")
 
@@ -347,13 +479,6 @@ class MainWindow(QWidget):
         priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
         priority_label = QLabel(priority_text)
         priority_label.setAlignment(Qt.AlignCenter)
-        priority_label.setStyleSheet("""
-            QLabel {
-                padding: 5px 10px;
-                border-radius: 3px;
-                font-weight: bold;
-            }
-        """)
         if task.priority == 1:
             priority_label.setStyleSheet("color: #ff6b6b; font-weight: bold;")
         elif task.priority == 2:
@@ -456,7 +581,76 @@ class MainWindow(QWidget):
         delete_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 6, delete_button)
 
-        self.update_stats()
+    def apply_filters(self):
+        search_text = self.search_input.text().lower()
+
+        if self.status_pending_radio.isChecked():
+            status_filter = "pending"
+        elif self.status_completed_radio.isChecked():
+            status_filter = "completed"
+        else:
+            status_filter = "all"
+
+        selected_priorities = []
+        if self.priority_high_check.isChecked():
+            selected_priorities.append(1)
+        if self.priority_medium_check.isChecked():
+            selected_priorities.append(2)
+        if self.priority_low_check.isChecked():
+            selected_priorities.append(3)
+
+        today = datetime.now().date()
+
+        filtered_tasks = []
+        for task in self.all_tasks:
+            if search_text:
+                if (search_text not in task.title.lower() and
+                        search_text not in task.description.lower()):
+                    continue
+
+            if status_filter == "pending" and task.completed:
+                continue
+            if status_filter == "completed" and not task.completed:
+                continue
+
+            if task.priority not in selected_priorities:
+                continue
+
+            if task.due_date:
+                try:
+                    due_date = datetime.fromisoformat(task.due_date).date()
+                    if self.date_overdue_radio.isChecked():
+                        if not (due_date < today and not task.completed):
+                            continue
+                    elif self.date_today_radio.isChecked():
+                        if not (due_date == today):
+                            continue
+                    elif self.date_future_radio.isChecked():
+                        if not (due_date > today):
+                            continue
+                except ValueError:
+                    pass
+
+            filtered_tasks.append(task)
+
+        self.table_widget.setRowCount(0)
+        for task in filtered_tasks:
+            self.add_item(task)
+
+        visible_count = len(filtered_tasks)
+        total_count = len(self.all_tasks)
+        self.stats_label.setText(f"{visible_count} of {total_count} tasks")
+
+    def reset_filters(self):
+        self.search_input.clear()
+        self.status_all_radio.setChecked(True)
+
+        self.priority_high_check.setChecked(True)
+        self.priority_medium_check.setChecked(True)
+        self.priority_low_check.setChecked(True)
+
+        self.date_all_radio.setChecked(True)
+        self.apply_filters()
 
     def refresh_task_row(self, task: Task):
         for row in range(self.table_widget.rowCount()):
@@ -519,20 +713,18 @@ class MainWindow(QWidget):
         if task:
             task.toggle_complete()
             self.todo_manager.write_data()
-            self.refresh_task_row(task)
+            for i, t in enumerate(self.all_tasks):
+                if t.id == task_id:
+                    self.all_tasks[i] = task
+                    break
+            self.apply_filters()
             self.update_stats()
-
-    def toggle_task_status(self, task: Task):
-        self.toggle_task_status_by_id(task.id)
 
     def view_task_by_id(self, task_id: str):
         task = self.todo_manager.get_task(task_id)
         if task:
             dialog = TaskDisplayDialog(self, task, on_edit_callback=lambda t: self.edit_task_by_id(t.id))
             dialog.exec_()
-
-    def view_task(self, task: Task):
-        self.view_task_by_id(task.id)
 
     def edit_task_by_id(self, task_id: str):
         task = self.todo_manager.get_task(task_id)
@@ -564,16 +756,19 @@ class MainWindow(QWidget):
 
             self.todo_manager.tasks[task.id] = updated_task
             self.todo_manager.write_data()
-            self.refresh_task_row(updated_task)
+
+            for i, t in enumerate(self.all_tasks):
+                if t.id == task.id:
+                    self.all_tasks[i] = updated_task
+                    break
+
+            self.apply_filters()
 
             QMessageBox.information(
                 self,
                 'Updated',
                 f'Task "{updated_task.title}" has been updated.'
             )
-
-    def edit_task(self, task: Task):
-        self.edit_task_by_id(task.id)
 
     def delete_task_by_id(self, task_id: str):
         task = self.todo_manager.get_task(task_id)
@@ -591,15 +786,13 @@ class MainWindow(QWidget):
 
         if reply == QMessageBox.Yes:
             self.todo_manager.delete_task(task.id)
-            self._init()
+            self.all_tasks = [t for t in self.all_tasks if t.id != task.id]
+            self.apply_filters()
             QMessageBox.information(
                 self,
                 'Deleted',
                 f'Task "{task.title}" has been deleted.'
             )
-
-    def delete_task(self, task: Task):
-        self.delete_task_by_id(task.id)
 
     def show_context_menu(self, position):
         row = self.table_widget.rowAt(position.y())
@@ -667,7 +860,8 @@ class MainWindow(QWidget):
             )
 
             self.todo_manager.add_task(task)
-            self.add_item(task)
+            self.all_tasks.append(task)
+            self.apply_filters()
 
             QMessageBox.information(
                 self,
@@ -695,7 +889,8 @@ class MainWindow(QWidget):
 
         if reply == QMessageBox.Yes:
             self.todo_manager.clear_completed()
-            self._init()
+            self.all_tasks = [t for t in self.all_tasks if not t.completed]
+            self.apply_filters()
             QMessageBox.information(
                 self,
                 'Cleared',
@@ -706,28 +901,32 @@ class MainWindow(QWidget):
         QMessageBox.information(
             self,
             'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.0.1</h3>'
+            '<h3>Smart Task Manager v1.0.2</h3>'
             '<p><b>Features:</b></p>'
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'
-            '<li>Edit tasks anytime - double click or use Edit button</li>'
-            '<li>Change priority through edit dialog only</li>'
-            '<li>Mark tasks as completed/pending</li>'
-            '<li>View task details</li>'
-            '<li>Right-click for quick actions</li>'
-            '<li>Delete individual tasks</li>'
-            '<li>Clear all completed tasks at once</li>'
+            '<li>Edit tasks at any time using the Edit button</li>'
+            '<li>Mark tasks as completed/pending with one click</li>'
+            '<li>View detailed task information</li>'
+            '<li>Right-click on tasks for context menu with quick actions</li>'
+            '<li>Delete individual tasks or clear all completed at once</li>'
+            '<li>Search tasks by text in title and description</li>'
+            '<li>Filter tasks by status (All/Pending/Completed)</li>'
+            '<li>Filter tasks by priority (High/Medium/Low)</li>'
+            '<li>Filter tasks by due date (All/Overdue/Today/Future)</li>'
+            '<li>Reset all filters with one click</li>'
             '</ul>'
             '<p><b>Quick Actions:</b></p>'
             '<ul>'
-            '<li>Click status button to toggle completion</li>'
+            '<li>Click the status button to toggle completion</li>'
             '<li>Right-click any task for context menu</li>'
+            '<li>Use search box for instant filtering</li>'
             '</ul>'
             '<p><b>Priority levels:</b></p>'
             '<ul>'
-            '<li>🚨 High - Urgent tasks</li>'
-            '<li>⚠️ Medium - Important tasks</li>'
-            '<li>📋 Low - Nice-to-have tasks</li>'
+            '<li>🚨 High - Urgent tasks (Red)</li>'
+            '<li>⚠️ Medium - Important tasks (Yellow)</li>'
+            '<li>📋 Low - Nice-to-have tasks (Green)</li>'
             '</ul>'
             '<p>Tasks are automatically saved to ~/.todos.json</p>'
         )
