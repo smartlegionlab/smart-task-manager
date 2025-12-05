@@ -344,13 +344,31 @@ class MainWindow(QWidget):
             title_item.setFont(font)
         self.table_widget.setItem(row_position, 0, title_item)
 
-        priority_combo = QComboBox()
-        priority_combo.addItems(["🚨 High", "⚠️ Medium", "📋 Low"])
-        priority_combo.setCurrentIndex(task.priority - 1)
-        priority_combo.currentIndexChanged.connect(
-            lambda index, t_id=task.id: self.change_priority_by_id(t_id, index + 1)
-        )
-        self.table_widget.setCellWidget(row_position, 1, priority_combo)
+        priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
+        priority_label = QLabel(priority_text)
+        priority_label.setAlignment(Qt.AlignCenter)
+        priority_label.setStyleSheet("""
+            QLabel {
+                padding: 5px 10px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+        """)
+        if task.priority == 1:
+            priority_label.setStyleSheet("color: #ff6b6b; font-weight: bold;")
+        elif task.priority == 2:
+            priority_label.setStyleSheet("color: #ffd166; font-weight: bold;")
+        else:
+            priority_label.setStyleSheet("color: #8ac926; font-weight: bold;")
+
+        priority_widget = QWidget()
+        priority_layout = QHBoxLayout(priority_widget)
+        priority_layout.addWidget(priority_label)
+        priority_layout.setAlignment(Qt.AlignCenter)
+        priority_layout.setContentsMargins(0, 0, 0, 0)
+        priority_widget.setLayout(priority_layout)
+
+        self.table_widget.setCellWidget(row_position, 1, priority_widget)
 
         status_button = QPushButton("✅ Completed" if task.completed else "⏳ Pending")
         status_button.setCheckable(True)
@@ -461,11 +479,18 @@ class MainWindow(QWidget):
                             font.setStrikeOut(False)
                             title_item.setFont(font)
 
-                    priority_combo = self.table_widget.cellWidget(row, 1)
-                    if isinstance(priority_combo, QComboBox):
-                        priority_combo.blockSignals(True)
-                        priority_combo.setCurrentIndex(task.priority - 1)
-                        priority_combo.blockSignals(False)
+                    priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
+                    priority_widget = self.table_widget.cellWidget(row, 1)
+                    if priority_widget:
+                        priority_label = priority_widget.findChild(QLabel)
+                        if priority_label:
+                            priority_label.setText(priority_text)
+                            if task.priority == 1:
+                                priority_label.setStyleSheet("color: #ff6b6b; font-weight: bold;")
+                            elif task.priority == 2:
+                                priority_label.setStyleSheet("color: #ffd166; font-weight: bold;")
+                            else:
+                                priority_label.setStyleSheet("color: #8ac926; font-weight: bold;")
 
                     status_button = self.table_widget.cellWidget(row, 2)
                     if isinstance(status_button, QPushButton):
@@ -488,26 +513,6 @@ class MainWindow(QWidget):
                             widget.task_id = task.id
 
                     return
-
-    def change_priority_by_id(self, task_id: str, new_priority: int):
-        task = self.todo_manager.get_task(task_id)
-        if task:
-            updated_task = Task(
-                id=task.id,
-                title=task.title,
-                description=task.description,
-                priority=new_priority,
-                completed=task.completed,
-                created_at=task.created_at,
-                due_date=task.due_date
-            )
-
-            self.todo_manager.tasks[task.id] = updated_task
-            self.todo_manager.write_data()
-            self.refresh_task_row(updated_task)
-
-    def change_priority(self, task: Task, new_priority: int):
-        self.change_priority_by_id(task.id, new_priority)
 
     def toggle_task_status_by_id(self, task_id: str):
         task = self.todo_manager.get_task(task_id)
@@ -705,7 +710,7 @@ class MainWindow(QWidget):
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'
             '<li>Edit tasks anytime - double click or use Edit button</li>'
-            '<li>Change priority directly from the table</li>'
+            '<li>Change priority through edit dialog only</li>'
             '<li>Mark tasks as completed/pending</li>'
             '<li>View task details</li>'
             '<li>Right-click for quick actions</li>'
@@ -714,10 +719,8 @@ class MainWindow(QWidget):
             '</ul>'
             '<p><b>Quick Actions:</b></p>'
             '<ul>'
-            '<li>Click priority dropdown to change priority</li>'
             '<li>Click status button to toggle completion</li>'
             '<li>Right-click any task for context menu</li>'
-            '<li>Double-click title to edit task</li>'
             '</ul>'
             '<p><b>Priority levels:</b></p>'
             '<ul>'
