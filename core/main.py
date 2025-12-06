@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QMessageBox,
     QLineEdit, QDialog, QTableWidget, QTableWidgetItem, QFrame,
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
-    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup
+    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup, QDesktopWidget
 )
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt, QDate
@@ -192,7 +192,7 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.0.3')
+        self.setWindowTitle('Smart Task Manager v1.0.4')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
@@ -203,7 +203,7 @@ class MainWindow(QWidget):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.0.3</sup>')
+        self.label_logo = QLabel('Smart Task Manager <sup>v1.0.4</sup>')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -454,11 +454,18 @@ class MainWindow(QWidget):
 
         self.setLayout(self.main_layout)
         self._init()
+        self.center_window()
 
     def _init(self):
         self.all_tasks = list(self.todo_manager.tasks.values())
         self.update_stats()
         self.apply_filters()
+
+    def center_window(self):
+        frame = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        frame.moveCenter(center_point)
+        self.move(frame.topLeft())
 
     def update_stats(self):
         total = len(self.all_tasks)
@@ -906,7 +913,7 @@ class MainWindow(QWidget):
         QMessageBox.information(
             self,
             'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.0.3</h3>'
+            '<h3>Smart Task Manager v1.0.4</h3>'
             '<p><b>Features:</b></p>'
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'
