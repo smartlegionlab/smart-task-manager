@@ -47,6 +47,7 @@ class TaskInputDialog(QDialog):
         title_layout.addWidget(self.char_counter)
 
         title_group.setLayout(title_layout)
+        self.update_char_counter()
         self.layout.addWidget(title_group)
 
         desc_group = QGroupBox("Description")
@@ -215,7 +216,7 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.1.1')
+        self.setWindowTitle('Smart Task Manager v1.1.2')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
@@ -226,7 +227,7 @@ class MainWindow(QWidget):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.1</sup>')
+        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.2</sup>')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -970,7 +971,7 @@ class MainWindow(QWidget):
         QMessageBox.information(
             self,
             'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.1.1</h3>'
+            '<h3>Smart Task Manager v1.1.2</h3>'
             '<p><b>Features:</b></p>'
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'

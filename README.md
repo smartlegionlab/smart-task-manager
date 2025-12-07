@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.1.1</sup>
+# Smart Task Manager <sup>v1.1.2</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an 
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
@@ -260,7 +260,7 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe --additional-hoo
 
 1. **"ModuleNotFoundError: No module named 'PyQt5'"**
    ```bash
-   pip install PyQt5
+   pip install -r requirements.txt
    ```
 
 2. **Application won't start**
