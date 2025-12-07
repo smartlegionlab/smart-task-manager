@@ -157,16 +157,10 @@ Build a standalone `smart_task_manager.exe` that runs without Python installatio
 
 #### Step 1: Get the Project Files
 1. **Download project ZIP:**
-   - Go to: https://github.com/smartlegionlab/smart-task-manager
+   - Go to: https://github.com/smartlegionlab/smart-task-manager-master
    - Click green "Code" button
    - Select "Download ZIP"
-   - Extract to: `C:\smart-task-manager\`
-
-2. **Or clone with git (if installed):**
-   ```cmd
-   git clone https://github.com/smartlegionlab/smart-task-manager.git
-   cd smart-task-manager
-   ```
+   - Extract to: `C:\smart-task-manager-master\`
 
 #### Step 2: Install Python
 1. Download Python installer from: https://python.org/downloads/
@@ -179,7 +173,7 @@ Build a standalone `smart_task_manager.exe` that runs without Python installatio
 2. Type `cmd`, press Enter
 3. Navigate to project folder:
    ```cmd
-   cd C:\smart-task-manager
+   cd C:\smart-task-manager-master
    ```
 
 #### Step 4: Create Virtual Environment
@@ -204,16 +198,16 @@ pip install PyQt5==5.15.9
 ```cmd
 # Build single .exe file
 
-pyinstaller --onefile --windowed --name "smart_task_manager.exe --additional-hooks-dir=. app.py
+pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-hooks-dir=. app.py
 
 # Wait for build to complete (1-2 minutes)
 ```
 
 #### Step 7: Find and Use
-**Location:** `C:\smart-task-manager\dist\smart_task_manager.exe`
+**Location:** `C:\smart-task-manager-master\dist\smart_task_manager.exe`
 
 **Create desktop shortcut:**
-1. Open `C:\smart-task-manager\dist\` folder
+1. Open `C:\smart-task-manager-master\dist\` folder
 2. Right-click `smart_task_manager.exe`
 3. Select "Create shortcut"
 4. Drag shortcut to desktop
