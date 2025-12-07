@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.1.0</sup>
+# Smart Task Manager <sup>v1.1.1</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an 
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
@@ -31,7 +31,6 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 
 ### 🎯 Priority System
 - **Three priority levels**: 🚨 High, ⚠️ Medium, 📋 Low
-- **Dynamic priority changes** directly from the task table
 - **Color-coded visual indicators** for quick identification
 
 ### ✅ Task Status
@@ -76,7 +75,7 @@ cd smart-task-manager
 
 2. **Install required dependencies**
 ```bash
-pip install PyQt5
+pip install -r requirements.txt
 ```
 
 3. **Run the application**
@@ -103,7 +102,6 @@ git clone https://github.com/smartlegionlab/smart-task-manager.git && cd smart-t
 3. Click **"Create Task"**
 
 ### Managing Tasks
-- **Change Priority**: Click the priority dropdown in the table
 - **Toggle Completion**: Click the status button (⏳/✅)
 - **View Details**: Click the "👁 View" button
 - **Edit Task**: Click the "✏️ Edit" button
@@ -219,7 +217,7 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe --additional-hoo
 2. Right-click `smart_task_manager.exe`
 3. Select "Create shortcut"
 4. Drag shortcut to desktop
-5. Rename shortcut to "Smart Pass Manager"
+5. Rename shortcut to "Smart Task Manager"
 6. Double-click to start
 
 

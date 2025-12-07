@@ -29,13 +29,23 @@ class TaskInputDialog(QDialog):
 
         title_group = QGroupBox("Task Title")
         title_layout = QVBoxLayout()
+
         self.title_label = QLabel('Task Title:')
         title_layout.addWidget(self.title_label)
+
         self.title_input = QLineEdit(self)
-        self.title_input.setPlaceholderText("Enter task title")
+        self.title_input.setPlaceholderText("Enter task title (max 100 characters)")
+        self.title_input.setMaxLength(100)
         if task:
             self.title_input.setText(task.title)
         title_layout.addWidget(self.title_input)
+
+        self.char_counter = QLabel("100/100 characters remaining")
+        self.char_counter.setAlignment(Qt.AlignRight)
+        self.char_counter.setStyleSheet("color: #888; font-size: 10px;")
+        self.title_input.textChanged.connect(self.update_char_counter)
+        title_layout.addWidget(self.char_counter)
+
         title_group.setLayout(title_layout)
         self.layout.addWidget(title_group)
 
@@ -93,6 +103,19 @@ class TaskInputDialog(QDialog):
         self.submit_button.setStyleSheet("background-color: #2a82da; color: white;")
         button_layout.addWidget(self.submit_button)
         self.layout.addLayout(button_layout)
+
+    def update_char_counter(self):
+        current_length = len(self.title_input.text())
+        remaining = 100 - current_length
+
+        self.char_counter.setText(f"{remaining}/100 characters remaining")
+
+        if remaining <= 10:
+            self.char_counter.setStyleSheet("color: #ff6b6b; font-size: 10px; font-weight: bold;")
+        elif remaining <= 30:
+            self.char_counter.setStyleSheet("color: #ffa726; font-size: 10px;")
+        else:
+            self.char_counter.setStyleSheet("color: #888; font-size: 10px;")
 
     def get_inputs(self):
         priority_map = {"High": 1, "Medium": 2, "Low": 3}
@@ -192,7 +215,7 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.1.0')
+        self.setWindowTitle('Smart Task Manager v1.1.1')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
@@ -203,7 +226,7 @@ class MainWindow(QWidget):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.0</sup>')
+        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.1</sup>')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -219,7 +242,7 @@ class MainWindow(QWidget):
 
         self.main_layout.addLayout(header_layout)
 
-        search_group = QGroupBox("Search & Filter")
+        search_group = QGroupBox("Search and Filters")
         search_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -750,6 +773,23 @@ class MainWindow(QWidget):
                 )
                 return
 
+            if len(inputs["title"]) > 100:
+                QMessageBox.warning(
+                    self,
+                    'Title Too Long',
+                    'Task title cannot exceed 100 characters.\n'
+                    f'Current length: {len(inputs["title"])} characters.'
+                )
+                return
+
+            if len(inputs["title"]) < 3:
+                QMessageBox.warning(
+                    self,
+                    'Title Too Short',
+                    'Task title must be at least 3 characters long.'
+                )
+                return
+
             updated_task = Task(
                 id=task.id,
                 title=inputs["title"],
@@ -860,6 +900,23 @@ class MainWindow(QWidget):
                 )
                 return
 
+            if len(inputs["title"]) > 100:
+                QMessageBox.warning(
+                    self,
+                    'Title Too Long',
+                    'Task title cannot exceed 100 characters.\n'
+                    f'Current length: {len(inputs["title"])} characters.'
+                )
+                return
+
+            if len(inputs["title"]) < 3:
+                QMessageBox.warning(
+                    self,
+                    'Title Too Short',
+                    'Task title must be at least 3 characters long.'
+                )
+                return
+
             task_id = str(uuid.uuid4())
             task = Task(
                 id=task_id,
@@ -913,7 +970,7 @@ class MainWindow(QWidget):
         QMessageBox.information(
             self,
             'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.1.0</h3>'
+            '<h3>Smart Task Manager v1.1.1</h3>'
             '<p><b>Features:</b></p>'
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'
