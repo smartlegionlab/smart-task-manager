@@ -192,7 +192,7 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.0.4')
+        self.setWindowTitle('Smart Task Manager v1.1.0')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
@@ -203,7 +203,7 @@ class MainWindow(QWidget):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.0.4</sup>')
+        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.0</sup>')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -320,7 +320,7 @@ class MainWindow(QWidget):
 
         search_layout.addLayout(date_layout, 3, 1, 1, 3)
 
-        self.reset_filters_btn = QPushButton("🗑️ Reset Filters")
+        self.reset_filters_btn = QPushButton("Reset Filters")
         self.reset_filters_btn.clicked.connect(self.reset_filters)
         self.reset_filters_btn.setStyleSheet("""
             QPushButton {
@@ -386,7 +386,7 @@ class MainWindow(QWidget):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(10)
 
-        self.btn_new_task = QPushButton('➕ Add Task')
+        self.btn_new_task = QPushButton('+ Add Task')
         self.btn_new_task.setMinimumHeight(40)
         self.btn_new_task.clicked.connect(self.add_task)
         self.btn_new_task.setStyleSheet("""
@@ -403,19 +403,19 @@ class MainWindow(QWidget):
         """)
         button_layout.addWidget(self.btn_new_task)
 
-        self.btn_clear_completed = QPushButton('🗑️ Clear Completed')
+        self.btn_clear_completed = QPushButton('Clear Completed')
         self.btn_clear_completed.setMinimumHeight(40)
         self.btn_clear_completed.clicked.connect(self.clear_completed)
         button_layout.addWidget(self.btn_clear_completed)
 
         button_layout.addStretch()
 
-        self.btn_help = QPushButton('❓ Help')
+        self.btn_help = QPushButton('? Help')
         self.btn_help.setMinimumHeight(40)
         self.btn_help.clicked.connect(self.show_help)
         button_layout.addWidget(self.btn_help)
 
-        self.btn_exit = QPushButton('🚪 Exit')
+        self.btn_exit = QPushButton('Exit')
         self.btn_exit.setMinimumHeight(40)
         self.btn_exit.clicked.connect(self.close)
         self.btn_exit.setStyleSheet("""
@@ -572,7 +572,7 @@ class MainWindow(QWidget):
         edit_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 5, edit_button)
 
-        delete_button = QPushButton("🗑️")
+        delete_button = QPushButton("Delete")
         delete_button.setToolTip("Delete this task")
         delete_button.setStyleSheet("""
             QPushButton {
@@ -580,8 +580,8 @@ class MainWindow(QWidget):
                 color: white;
                 border-radius: 3px;
                 padding: 5px;
-                min-width: 30px;
-                max-width: 30px;
+                min-width: 60px;
+                max-width: 60px;
             }
             QPushButton:hover {
                 background-color: #ca1a1a;
@@ -913,7 +913,7 @@ class MainWindow(QWidget):
         QMessageBox.information(
             self,
             'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.0.4</h3>'
+            '<h3>Smart Task Manager v1.1.0</h3>'
             '<p><b>Features:</b></p>'
             '<ul>'
             '<li>Create tasks with title, description, priority, and due date</li>'

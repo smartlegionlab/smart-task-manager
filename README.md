@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.0.4</sup>
+# Smart Task Manager <sup>v1.1.0</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an 
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
@@ -148,6 +148,86 @@ Tasks are automatically saved to:
 ### Backup & Migration
 - Simply copy the `~/.todos.json` file to back up your tasks
 - The JSON format is human-readable and editable
+
+---
+
+## 📦 Windows Standalone Executable
+
+### Creating a Single-File *.exe
+
+Build a standalone `smart_task_manager.exe` that runs without Python installation:
+
+#### Step 1: Get the Project Files
+1. **Download project ZIP:**
+   - Go to: https://github.com/smartlegionlab/smart-task-manager
+   - Click green "Code" button
+   - Select "Download ZIP"
+   - Extract to: `C:\smart-task-manager\`
+
+2. **Or clone with git (if installed):**
+   ```cmd
+   git clone https://github.com/smartlegionlab/smart-task-manager.git
+   cd smart-task-manager
+   ```
+
+#### Step 2: Install Python
+1. Download Python installer from: https://python.org/downloads/
+2. Run installer
+3. **IMPORTANT:** Check ✅ "Add Python to PATH"
+4. Click "Install Now"
+
+#### Step 3: Open Command Prompt
+1. Press `Win + R`
+2. Type `cmd`, press Enter
+3. Navigate to project folder:
+   ```cmd
+   cd C:\smart-task-manager
+   ```
+
+#### Step 4: Create Virtual Environment
+```cmd
+# Create virtual environment
+python -m venv venv
+
+# Activate it (IMPORTANT!)
+.\venv\Scripts\activate
+
+# You should see (venv) in your command prompt
+```
+
+#### Step 5: Install Dependencies
+```cmd
+# Install PyInstaller in virtual environment
+pip install pyinstaller
+pip install PyQt5==5.15.9
+```
+
+#### Step 6: Build Executable
+```cmd
+# Build single .exe file
+
+pyinstaller --onefile --windowed --name "smart_task_manager.exe --additional-hooks-dir=. app.py
+
+# Wait for build to complete (1-2 minutes)
+```
+
+#### Step 7: Find and Use
+**Location:** `C:\smart-task-manager\dist\smart_task_manager.exe`
+
+**Create desktop shortcut:**
+1. Open `C:\smart-task-manager\dist\` folder
+2. Right-click `smart_task_manager.exe`
+3. Select "Create shortcut"
+4. Drag shortcut to desktop
+5. Rename shortcut to "Smart Pass Manager"
+6. Double-click to start
+
+
+**What you get:**
+- Single file: `smart_task_manager.exe` (~50MB)
+- No Python required to run
+- Works on any Windows 10/11 PC
+- Can be copied to USB drive
 
 ---
 
