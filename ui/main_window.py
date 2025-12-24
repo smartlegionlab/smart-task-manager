@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.load_projects()
 
         self.center_window()
+        self.selected_project_item = None
 
     def center_window(self):
         frame = self.frameGeometry()
@@ -357,10 +358,15 @@ class MainWindow(QMainWindow):
             if project.description:
                 item.setToolTip(0, project.description)
 
+            if self.current_project_id and project.id == self.current_project_id:
+                self.projects_tree.setCurrentItem(item)
+                self.selected_project_item = item
+
         self.update_statistics()
 
     def on_project_selected(self, item, column):
         self.current_project_id = item.project_id
+        self.selected_project_item = item
         self.btn_delete_project.setEnabled(True)
         self.btn_new_task.setEnabled(True)
 
@@ -502,6 +508,8 @@ class MainWindow(QMainWindow):
                 self.load_tasks_for_project(self.current_project_id)
                 self.update_statistics()
 
+                self.load_projects()
+
                 progress = self.manager.get_project_progress(self.current_project_id)
                 self.project_progress.set_progress(progress)
 
@@ -593,6 +601,8 @@ class MainWindow(QMainWindow):
             self.load_tasks_for_project(self.current_project_id)
             self.update_statistics()
 
+            self.load_projects()
+
             progress = self.manager.get_project_progress(self.current_project_id)
             self.project_progress.set_progress(progress)
 
@@ -618,6 +628,8 @@ class MainWindow(QMainWindow):
                 self.load_tasks_for_project(self.current_project_id)
                 self.update_statistics()
 
+                self.load_projects()
+
                 progress = self.manager.get_project_progress(self.current_project_id)
                 self.project_progress.set_progress(progress)
 
@@ -625,6 +637,8 @@ class MainWindow(QMainWindow):
         if self.current_project_id:
             self.load_tasks_for_project(self.current_project_id)
             self.update_statistics()
+
+            self.load_projects()
 
             progress = self.manager.get_project_progress(self.current_project_id)
             self.project_progress.set_progress(progress)
@@ -647,6 +661,8 @@ class MainWindow(QMainWindow):
             if self.current_project_id:
                 self.load_tasks_for_project(self.current_project_id)
                 self.update_statistics()
+
+                self.load_projects()
 
                 progress = self.manager.get_project_progress(self.current_project_id)
                 self.project_progress.set_progress(progress)

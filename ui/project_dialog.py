@@ -111,7 +111,6 @@ class ProjectDialog(QDialog):
             'name': self.name_input.text().strip(),
             'version': self.version_input.text().strip(),
             'description': self.desc_input.toPlainText().strip() or None
-            # УБРАНО: 'labels': self.selected_label_ids
         }
 
     def accept(self):
