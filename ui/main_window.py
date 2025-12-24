@@ -151,12 +151,6 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
-        labels_btn = QPushButton('Labels')
-        labels_btn.clicked.connect(self.manage_labels)
-        toolbar.addWidget(labels_btn)
-
-        toolbar.addSeparator()
-
         refresh_btn = QPushButton('Refresh')
         refresh_btn.clicked.connect(self.refresh_view)
         toolbar.addWidget(refresh_btn)
@@ -167,13 +161,59 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(10)
 
         left_panel = QWidget()
-        left_panel.setMinimumWidth(300)
+        left_panel.setMinimumWidth(320)
         left_panel.setMaximumWidth(400)
         left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(8)
 
         projects_header = QLabel('📁 Projects')
         projects_header.setFont(QFont("Arial", 14, QFont.Bold))
         left_layout.addWidget(projects_header)
+
+        project_buttons_layout = QHBoxLayout()
+        project_buttons_layout.setSpacing(5)
+
+        self.btn_new_project = QPushButton('+ New Project')
+        self.btn_new_project.clicked.connect(self.create_project)
+        self.btn_new_project.setStyleSheet("""
+            QPushButton {
+                background-color: #2a82da;
+                color: white;
+                font-weight: bold;
+                padding: 8px 12px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #1a72ca;
+            }
+        """)
+        project_buttons_layout.addWidget(self.btn_new_project)
+
+        self.btn_delete_project = QPushButton('Delete')
+        self.btn_delete_project.clicked.connect(self.delete_current_project)
+        self.btn_delete_project.setEnabled(False)
+        self.btn_delete_project.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                font-weight: bold;
+                padding: 8px 12px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+            QPushButton:hover:enabled {
+                background-color: #c0392b;
+            }
+            QPushButton:disabled {
+                background-color: #666;
+                color: #999;
+            }
+        """)
+        project_buttons_layout.addWidget(self.btn_delete_project)
+
+        left_layout.addLayout(project_buttons_layout)
 
         self.projects_tree = QTreeWidget()
         self.projects_tree.setHeaderLabel('Projects')
@@ -184,39 +224,19 @@ class MainWindow(QMainWindow):
                 border-radius: 5px;
             }
             QTreeWidget::item {
-                padding: 5px;
+                padding: 8px 5px;
+                border-bottom: 1px solid #333;
             }
             QTreeWidget::item:selected {
                 background-color: #2a82da;
+                color: white;
+            }
+            QTreeWidget::item:hover:!selected {
+                background-color: #3a3a3a;
             }
         """)
         self.projects_tree.itemClicked.connect(self.on_project_selected)
-        left_layout.addWidget(self.projects_tree)
-
-        project_actions_layout = QHBoxLayout()
-
-        self.btn_new_project = QPushButton('+ New Project')
-        self.btn_new_project.clicked.connect(self.create_project)
-        self.btn_new_project.setStyleSheet("""
-            QPushButton {
-                background-color: #2a82da;
-                color: white;
-                font-weight: bold;
-                padding: 8px;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #1a72ca;
-            }
-        """)
-        project_actions_layout.addWidget(self.btn_new_project)
-
-        self.btn_delete_project = QPushButton('Delete')
-        self.btn_delete_project.clicked.connect(self.delete_current_project)
-        self.btn_delete_project.setEnabled(False)
-        project_actions_layout.addWidget(self.btn_delete_project)
-
-        left_layout.addLayout(project_actions_layout)
+        left_layout.addWidget(self.projects_tree, 1)
 
         stats_group = QGroupBox("📊 Global Statistics")
         stats_group.setStyleSheet("""
@@ -224,8 +244,8 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
                 border: 2px solid #444;
                 border-radius: 8px;
-                margin-top: 10px;
                 padding-top: 10px;
+                margin-top: 5px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -235,186 +255,87 @@ class MainWindow(QMainWindow):
             }
         """)
         stats_layout = QVBoxLayout(stats_group)
+        stats_layout.setSpacing(8)
 
         main_stats_layout = QGridLayout()
+        main_stats_layout.setSpacing(5)
+        main_stats_layout.setContentsMargins(5, 5, 5, 5)
 
-        projects_box = QGroupBox()
-        projects_box.setStyleSheet("""
-            QGroupBox {
-                border: 1px solid #444;
-                border-radius: 5px;
-                background-color: #2a2a2a;
-            }
-        """)
-        projects_layout = QVBoxLayout(projects_box)
-
-        projects_header_layout = QHBoxLayout()
-        projects_icon = QLabel("📁")
-        projects_icon.setStyleSheet("font-size: 16px;")
-        projects_header_layout.addWidget(projects_icon)
-
-        projects_title = QLabel("Projects")
-        projects_title.setStyleSheet("font-weight: bold; color: #3498db;")
-        projects_header_layout.addWidget(projects_title)
-        projects_header_layout.addStretch()
-
-        projects_layout.addLayout(projects_header_layout)
-
+        projects_box = self.create_stat_box("📁", "Projects", "#3498db")
         self.stats_projects = QLabel("0")
         self.stats_projects.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: bold;
                 color: white;
                 qproperty-alignment: 'AlignCenter';
             }
         """)
-        projects_layout.addWidget(self.stats_projects)
-
-        projects_subtitle = QLabel("Total")
-        projects_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
-        projects_layout.addWidget(projects_subtitle)
-
+        projects_box.layout().insertWidget(1, self.stats_projects)
         main_stats_layout.addWidget(projects_box, 0, 0)
 
-        tasks_box = QGroupBox()
-        tasks_box.setStyleSheet("""
-            QGroupBox {
-                border: 1px solid #444;
-                border-radius: 5px;
-                background-color: #2a2a2a;
-            }
-        """)
-        tasks_layout = QVBoxLayout(tasks_box)
-
-        tasks_header_layout = QHBoxLayout()
-        tasks_icon = QLabel("✅")
-        tasks_icon.setStyleSheet("font-size: 16px;")
-        tasks_header_layout.addWidget(tasks_icon)
-
-        tasks_title = QLabel("Tasks")
-        tasks_title.setStyleSheet("font-weight: bold; color: #2ecc71;")
-        tasks_header_layout.addWidget(tasks_title)
-        tasks_header_layout.addStretch()
-
-        tasks_layout.addLayout(tasks_header_layout)
-
+        tasks_box = self.create_stat_box("✅", "Tasks", "#2ecc71")
         self.stats_tasks = QLabel("0")
         self.stats_tasks.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: bold;
                 color: white;
                 qproperty-alignment: 'AlignCenter';
             }
         """)
-        tasks_layout.addWidget(self.stats_tasks)
-
-        tasks_subtitle = QLabel("Total")
-        tasks_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
-        tasks_layout.addWidget(tasks_subtitle)
-
+        tasks_box.layout().insertWidget(1, self.stats_tasks)
         main_stats_layout.addWidget(tasks_box, 0, 1)
 
-        subtasks_box = QGroupBox()
-        subtasks_box.setStyleSheet("""
-            QGroupBox {
-                border: 1px solid #444;
-                border-radius: 5px;
-                background-color: #2a2a2a;
-            }
-        """)
-        subtasks_layout = QVBoxLayout(subtasks_box)
-
-        subtasks_header_layout = QHBoxLayout()
-        subtasks_icon = QLabel("📝")
-        subtasks_icon.setStyleSheet("font-size: 16px;")
-        subtasks_header_layout.addWidget(subtasks_icon)
-
-        subtasks_title = QLabel("Subtasks")
-        subtasks_title.setStyleSheet("font-weight: bold; color: #9b59b6;")
-        subtasks_header_layout.addWidget(subtasks_title)
-        subtasks_header_layout.addStretch()
-
-        subtasks_layout.addLayout(subtasks_header_layout)
-
+        subtasks_box = self.create_stat_box("📝", "Subtasks", "#9b59b6")
         self.stats_subtasks = QLabel("0")
         self.stats_subtasks.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: bold;
                 color: white;
                 qproperty-alignment: 'AlignCenter';
             }
         """)
-        subtasks_layout.addWidget(self.stats_subtasks)
-
-        subtasks_subtitle = QLabel("Total")
-        subtasks_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
-        subtasks_layout.addWidget(subtasks_subtitle)
-
+        subtasks_box.layout().insertWidget(1, self.stats_subtasks)
         main_stats_layout.addWidget(subtasks_box, 1, 0)
 
-        labels_box = QGroupBox()
-        labels_box.setStyleSheet("""
-            QGroupBox {
-                border: 1px solid #444;
-                border-radius: 5px;
-                background-color: #2a2a2a;
-            }
-        """)
-        labels_layout = QVBoxLayout(labels_box)
-
-        labels_header_layout = QHBoxLayout()
-        labels_icon = QLabel("🏷️")
-        labels_icon.setStyleSheet("font-size: 16px;")
-        labels_header_layout.addWidget(labels_icon)
-
-        labels_title = QLabel("Labels")
-        labels_title.setStyleSheet("font-weight: bold; color: #e74c3c;")
-        labels_header_layout.addWidget(labels_title)
-        labels_header_layout.addStretch()
-
-        labels_layout.addLayout(labels_header_layout)
-
+        labels_box = self.create_stat_box("🏷️", "Labels", "#e74c3c")
         self.stats_labels = QLabel("0")
         self.stats_labels.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: bold;
                 color: white;
                 qproperty-alignment: 'AlignCenter';
             }
         """)
-        labels_layout.addWidget(self.stats_labels)
-
-        labels_subtitle = QLabel("Total")
-        labels_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
-        labels_layout.addWidget(labels_subtitle)
-
+        labels_box.layout().insertWidget(1, self.stats_labels)
         main_stats_layout.addWidget(labels_box, 1, 1)
 
         stats_layout.addLayout(main_stats_layout)
 
-        completion_group = QGroupBox("Completion Rate")
+        completion_group = QGroupBox("Completion")
         completion_group.setStyleSheet("""
             QGroupBox {
                 border: 1px solid #444;
                 border-radius: 5px;
-                margin-top: 10px;
+                margin-top: 5px;
             }
         """)
         completion_layout = QVBoxLayout(completion_group)
+        completion_layout.setSpacing(5)
+        completion_layout.setContentsMargins(8, 12, 8, 8)
 
         tasks_progress_layout = QHBoxLayout()
         tasks_progress_label = QLabel("Tasks:")
-        tasks_progress_label.setStyleSheet("color: #aaa; font-size: 12px;")
+        tasks_progress_label.setStyleSheet("color: #aaa; font-size: 11px;")
         tasks_progress_layout.addWidget(tasks_progress_label)
 
         tasks_progress_layout.addStretch()
 
         self.stats_completed_tasks = QLabel("0/0")
-        self.stats_completed_tasks.setStyleSheet("color: #2ecc71; font-weight: bold; font-size: 12px;")
+        self.stats_completed_tasks.setStyleSheet("color: #2ecc71; font-weight: bold; font-size: 11px;")
         tasks_progress_layout.addWidget(self.stats_completed_tasks)
 
         completion_layout.addLayout(tasks_progress_layout)
@@ -424,13 +345,14 @@ class MainWindow(QMainWindow):
         self.tasks_progress_bar.setFormat("%p%")
         self.tasks_progress_bar.setStyleSheet("""
             QProgressBar {
-                height: 12px;
+                height: 10px;
                 border: 1px solid #444;
-                border-radius: 6px;
+                border-radius: 5px;
+                font-size: 9px;
             }
             QProgressBar::chunk {
                 background-color: #2ecc71;
-                border-radius: 5px;
+                border-radius: 4px;
             }
         """)
         self.tasks_progress_bar.setValue(0)
@@ -438,13 +360,13 @@ class MainWindow(QMainWindow):
 
         subtasks_progress_layout = QHBoxLayout()
         subtasks_progress_label = QLabel("Subtasks:")
-        subtasks_progress_label.setStyleSheet("color: #aaa; font-size: 12px;")
+        subtasks_progress_label.setStyleSheet("color: #aaa; font-size: 11px;")
         subtasks_progress_layout.addWidget(subtasks_progress_label)
 
         subtasks_progress_layout.addStretch()
 
         self.stats_completed_subtasks = QLabel("0/0")
-        self.stats_completed_subtasks.setStyleSheet("color: #9b59b6; font-weight: bold; font-size: 12px;")
+        self.stats_completed_subtasks.setStyleSheet("color: #9b59b6; font-weight: bold; font-size: 11px;")
         subtasks_progress_layout.addWidget(self.stats_completed_subtasks)
 
         completion_layout.addLayout(subtasks_progress_layout)
@@ -454,13 +376,14 @@ class MainWindow(QMainWindow):
         self.subtasks_progress_bar.setFormat("%p%")
         self.subtasks_progress_bar.setStyleSheet("""
             QProgressBar {
-                height: 12px;
+                height: 10px;
                 border: 1px solid #444;
-                border-radius: 6px;
+                border-radius: 5px;
+                font-size: 9px;
             }
             QProgressBar::chunk {
                 background-color: #9b59b6;
-                border-radius: 5px;
+                border-radius: 4px;
             }
         """)
         self.subtasks_progress_bar.setValue(0)
@@ -469,24 +392,25 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(completion_group)
 
         data_info_layout = QHBoxLayout()
+        data_info_layout.setSpacing(5)
 
         data_info_label = QLabel("💾")
-        data_info_label.setStyleSheet("font-size: 12px;")
+        data_info_label.setStyleSheet("font-size: 11px;")
         data_info_layout.addWidget(data_info_label)
 
         data_path_label = QLabel("~/.project_manager")
-        data_path_label.setStyleSheet("color: #888; font-size: 10px; font-family: monospace;")
+        data_path_label.setStyleSheet("color: #888; font-size: 9px; font-family: monospace;")
         data_info_layout.addWidget(data_path_label)
 
         data_info_layout.addStretch()
 
         refresh_stats_btn = QPushButton("🔄")
-        refresh_stats_btn.setFixedSize(24, 24)
+        refresh_stats_btn.setFixedSize(20, 20)
         refresh_stats_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
-                font-size: 14px;
+                font-size: 12px;
             }
             QPushButton:hover {
                 color: #3498db;
@@ -499,7 +423,7 @@ class MainWindow(QMainWindow):
         stats_layout.addLayout(data_info_layout)
 
         left_layout.addWidget(stats_group)
-        left_layout.addStretch()
+
         main_layout.addWidget(left_panel)
 
         right_panel = QWidget()
@@ -667,6 +591,42 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.project_progress_group)
 
         main_layout.addWidget(right_panel, 1)
+
+    def create_stat_box(self, icon: str, title: str, color: str) -> QGroupBox:
+        box = QGroupBox()
+        box.setStyleSheet(f"""
+            QGroupBox {{
+                border: 1px solid #444;
+                border-radius: 6px;
+                background-color: #2a2a2a;
+                min-height: 70px;
+            }}
+        """)
+
+        layout = QVBoxLayout(box)
+        layout.setSpacing(3)
+        layout.setContentsMargins(5, 8, 5, 8)
+
+        header_layout = QHBoxLayout()
+
+        icon_label = QLabel(icon)
+        icon_label.setStyleSheet("font-size: 14px;")
+        header_layout.addWidget(icon_label)
+
+        title_label = QLabel(title)
+        title_label.setStyleSheet(f"font-weight: bold; color: {color}; font-size: 11px;")
+        header_layout.addWidget(title_label)
+
+        header_layout.addStretch()
+        layout.addLayout(header_layout)
+
+        layout.addStretch()
+
+        subtitle = QLabel("Total")
+        subtitle.setStyleSheet("color: #aaa; font-size: 9px; qproperty-alignment: 'AlignCenter';")
+        layout.addWidget(subtitle)
+
+        return box
 
     def update_project_progress_panel(self, project_id: str):
         project = self.manager.get_project(project_id)
