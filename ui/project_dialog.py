@@ -186,16 +186,18 @@ class ProjectDialog(QDialog):
             label = self.manager.get_label(label_id)
             if label:
                 label_widget = LabelWidget(label.name, label.color)
+                label_widget.setMinimumHeight(30)
+                label_widget.setMinimumWidth(80)
 
                 remove_btn = QPushButton('×')
-                remove_btn.setFixedSize(20, 20)
+                remove_btn.setFixedSize(24, 24)
                 remove_btn.setStyleSheet("""
                     QPushButton {
                         background-color: #e74c3c;
                         color: white;
-                        border-radius: 10px;
+                        border-radius: 12px;
                         font-weight: bold;
-                        font-size: 12px;
+                        font-size: 14px;
                     }
                     QPushButton:hover {
                         background-color: #c0392b;
@@ -206,7 +208,7 @@ class ProjectDialog(QDialog):
                 container = QWidget()
                 container_layout = QHBoxLayout(container)
                 container_layout.setContentsMargins(0, 0, 0, 0)
-                container_layout.setSpacing(3)
+                container_layout.setSpacing(5)
                 container_layout.addWidget(label_widget)
                 container_layout.addWidget(remove_btn)
 
