@@ -221,6 +221,48 @@ class MainWindow(QMainWindow):
         self.project_progress = ProgressWidget()
         left_layout.addWidget(self.project_progress)
 
+        stats_group = QGroupBox("📊 Statistics")
+        stats_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #444;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #2a82da;
+            }
+        """)
+        stats_layout = QGridLayout()
+
+        self.stats_projects = QLabel("Projects: 0")
+        self.stats_projects.setStyleSheet("font-size: 12px;")
+        stats_layout.addWidget(self.stats_projects, 0, 0)
+
+        self.stats_tasks = QLabel("Tasks: 0")
+        self.stats_tasks.setStyleSheet("font-size: 12px;")
+        stats_layout.addWidget(self.stats_tasks, 0, 1)
+
+        self.stats_subtasks = QLabel("Subtasks: 0")
+        self.stats_subtasks.setStyleSheet("font-size: 12px;")
+        stats_layout.addWidget(self.stats_subtasks, 1, 0)
+
+        self.stats_completed = QLabel("Completed: 0%")
+        self.stats_completed.setStyleSheet("font-size: 12px;")
+        stats_layout.addWidget(self.stats_completed, 1, 1)
+
+        self.stats_labels = QLabel("Labels: 0")
+        self.stats_labels.setStyleSheet("font-size: 12px;")
+        stats_layout.addWidget(self.stats_labels, 2, 0)
+
+        stats_layout.setColumnStretch(2, 1)
+        stats_group.setLayout(stats_layout)
+        left_layout.addWidget(stats_group)
+
         left_layout.addStretch()
         main_layout.addWidget(left_panel)
 
@@ -286,28 +328,6 @@ class MainWindow(QMainWindow):
         self.tasks_table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeToContents)
 
         right_layout.addWidget(self.tasks_table)
-
-        stats_group = QGroupBox("Statistics")
-        stats_layout = QGridLayout()
-
-        self.stats_projects = QLabel("Projects: 0")
-        stats_layout.addWidget(self.stats_projects, 0, 0)
-
-        self.stats_tasks = QLabel("Tasks: 0")
-        stats_layout.addWidget(self.stats_tasks, 0, 1)
-
-        self.stats_subtasks = QLabel("Subtasks: 0")
-        stats_layout.addWidget(self.stats_subtasks, 0, 2)
-
-        self.stats_completed = QLabel("Completed: 0%")
-        stats_layout.addWidget(self.stats_completed, 1, 0)
-
-        self.stats_labels = QLabel("Labels: 0")
-        stats_layout.addWidget(self.stats_labels, 1, 1)
-
-        stats_layout.setColumnStretch(3, 1)
-        stats_group.setLayout(stats_layout)
-        right_layout.addWidget(stats_group)
 
         main_layout.addWidget(right_panel, 1)
 
@@ -494,11 +514,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', 'Project name is required')
                 return
 
-            project = self.manager.create_project(
-                name=data['name'],
-                version=data['version'],
-                description=data.get('description')
-            )
+            project = self.manager.create_project(**data)
             self.load_projects()
 
             for i in range(self.projects_tree.topLevelItemCount()):
@@ -527,12 +543,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', 'Project name is required')
                 return
 
-            self.manager.update_project(
-                project.id,
-                name=data['name'],
-                version=data['version'],
-                description=data.get('description')
-            )
+            self.manager.update_project(project.id, **data)
             self.load_projects()
 
             if self.current_project_id == project.id:
@@ -882,7 +893,7 @@ class MainWindow(QMainWindow):
             <li>Select a project from the left panel</li>
             <li>Add tasks to the project using File → New Task or the New Task button</li>
             <li>Add subtasks by editing a task and going to the Subtasks tab</li>
-            <li>Use labels to categorize projects, tasks, and subtasks</li>
+            <li>Use labels to categorize tasks and subtasks</li>
             </ol>
             <p><b>Keyboard Shortcuts:</b></p>
             <ul>
@@ -897,7 +908,7 @@ class MainWindow(QMainWindow):
             </ul>
             <p><b>Features:</b></p>
             <ul>
-            <li>Projects have name, version, description, and labels</li>
+            <li>Projects have name, version, description</li>
             <li>Tasks have title, description, priority, due date, and labels</li>
             <li>Subtasks inherit parent task properties and can have their own labels</li>
             <li>Automatic completion: When all subtasks are done, parent task is marked complete</li>

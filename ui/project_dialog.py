@@ -17,12 +17,11 @@ class ProjectDialog(QDialog):
 
         self.setWindowTitle('Edit Project' if self.is_edit_mode else 'Create New Project')
         self.setMinimumWidth(500)
-        self.setMinimumHeight(300)  # Уменьшена высота, так как убрали метки
+        self.setMinimumHeight(300)
 
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(10)
 
-        # Name
         name_group = QFrame()
         name_group.setFrameStyle(QFrame.StyledPanel)
         name_layout = QGridLayout(name_group)
