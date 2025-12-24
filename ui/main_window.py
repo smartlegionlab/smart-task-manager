@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
 
         left_layout.addLayout(project_actions_layout)
 
-        stats_group = QGroupBox("📊 Statistics")
+        stats_group = QGroupBox("📊 Global Statistics")
         stats_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -234,32 +234,271 @@ class MainWindow(QMainWindow):
                 color: #2a82da;
             }
         """)
-        stats_layout = QGridLayout()
+        stats_layout = QVBoxLayout(stats_group)
 
-        self.stats_projects = QLabel("Projects: 0")
-        self.stats_projects.setStyleSheet("font-size: 12px;")
-        stats_layout.addWidget(self.stats_projects, 0, 0)
+        main_stats_layout = QGridLayout()
 
-        self.stats_tasks = QLabel("Tasks: 0")
-        self.stats_tasks.setStyleSheet("font-size: 12px;")
-        stats_layout.addWidget(self.stats_tasks, 0, 1)
+        projects_box = QGroupBox()
+        projects_box.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 5px;
+                background-color: #2a2a2a;
+            }
+        """)
+        projects_layout = QVBoxLayout(projects_box)
 
-        self.stats_subtasks = QLabel("Subtasks: 0")
-        self.stats_subtasks.setStyleSheet("font-size: 12px;")
-        stats_layout.addWidget(self.stats_subtasks, 1, 0)
+        projects_header_layout = QHBoxLayout()
+        projects_icon = QLabel("📁")
+        projects_icon.setStyleSheet("font-size: 16px;")
+        projects_header_layout.addWidget(projects_icon)
 
-        self.stats_completed = QLabel("Completed: 0%")
-        self.stats_completed.setStyleSheet("font-size: 12px;")
-        stats_layout.addWidget(self.stats_completed, 1, 1)
+        projects_title = QLabel("Projects")
+        projects_title.setStyleSheet("font-weight: bold; color: #3498db;")
+        projects_header_layout.addWidget(projects_title)
+        projects_header_layout.addStretch()
 
-        self.stats_labels = QLabel("Labels: 0")
-        self.stats_labels.setStyleSheet("font-size: 12px;")
-        stats_layout.addWidget(self.stats_labels, 2, 0)
+        projects_layout.addLayout(projects_header_layout)
 
-        stats_layout.setColumnStretch(2, 1)
-        stats_group.setLayout(stats_layout)
+        self.stats_projects = QLabel("0")
+        self.stats_projects.setStyleSheet("""
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+                qproperty-alignment: 'AlignCenter';
+            }
+        """)
+        projects_layout.addWidget(self.stats_projects)
+
+        projects_subtitle = QLabel("Total")
+        projects_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
+        projects_layout.addWidget(projects_subtitle)
+
+        main_stats_layout.addWidget(projects_box, 0, 0)
+
+        tasks_box = QGroupBox()
+        tasks_box.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 5px;
+                background-color: #2a2a2a;
+            }
+        """)
+        tasks_layout = QVBoxLayout(tasks_box)
+
+        tasks_header_layout = QHBoxLayout()
+        tasks_icon = QLabel("✅")
+        tasks_icon.setStyleSheet("font-size: 16px;")
+        tasks_header_layout.addWidget(tasks_icon)
+
+        tasks_title = QLabel("Tasks")
+        tasks_title.setStyleSheet("font-weight: bold; color: #2ecc71;")
+        tasks_header_layout.addWidget(tasks_title)
+        tasks_header_layout.addStretch()
+
+        tasks_layout.addLayout(tasks_header_layout)
+
+        self.stats_tasks = QLabel("0")
+        self.stats_tasks.setStyleSheet("""
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+                qproperty-alignment: 'AlignCenter';
+            }
+        """)
+        tasks_layout.addWidget(self.stats_tasks)
+
+        tasks_subtitle = QLabel("Total")
+        tasks_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
+        tasks_layout.addWidget(tasks_subtitle)
+
+        main_stats_layout.addWidget(tasks_box, 0, 1)
+
+        subtasks_box = QGroupBox()
+        subtasks_box.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 5px;
+                background-color: #2a2a2a;
+            }
+        """)
+        subtasks_layout = QVBoxLayout(subtasks_box)
+
+        subtasks_header_layout = QHBoxLayout()
+        subtasks_icon = QLabel("📝")
+        subtasks_icon.setStyleSheet("font-size: 16px;")
+        subtasks_header_layout.addWidget(subtasks_icon)
+
+        subtasks_title = QLabel("Subtasks")
+        subtasks_title.setStyleSheet("font-weight: bold; color: #9b59b6;")
+        subtasks_header_layout.addWidget(subtasks_title)
+        subtasks_header_layout.addStretch()
+
+        subtasks_layout.addLayout(subtasks_header_layout)
+
+        self.stats_subtasks = QLabel("0")
+        self.stats_subtasks.setStyleSheet("""
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+                qproperty-alignment: 'AlignCenter';
+            }
+        """)
+        subtasks_layout.addWidget(self.stats_subtasks)
+
+        subtasks_subtitle = QLabel("Total")
+        subtasks_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
+        subtasks_layout.addWidget(subtasks_subtitle)
+
+        main_stats_layout.addWidget(subtasks_box, 1, 0)
+
+        labels_box = QGroupBox()
+        labels_box.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 5px;
+                background-color: #2a2a2a;
+            }
+        """)
+        labels_layout = QVBoxLayout(labels_box)
+
+        labels_header_layout = QHBoxLayout()
+        labels_icon = QLabel("🏷️")
+        labels_icon.setStyleSheet("font-size: 16px;")
+        labels_header_layout.addWidget(labels_icon)
+
+        labels_title = QLabel("Labels")
+        labels_title.setStyleSheet("font-weight: bold; color: #e74c3c;")
+        labels_header_layout.addWidget(labels_title)
+        labels_header_layout.addStretch()
+
+        labels_layout.addLayout(labels_header_layout)
+
+        self.stats_labels = QLabel("0")
+        self.stats_labels.setStyleSheet("""
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+                qproperty-alignment: 'AlignCenter';
+            }
+        """)
+        labels_layout.addWidget(self.stats_labels)
+
+        labels_subtitle = QLabel("Total")
+        labels_subtitle.setStyleSheet("color: #aaa; font-size: 11px; qproperty-alignment: 'AlignCenter';")
+        labels_layout.addWidget(labels_subtitle)
+
+        main_stats_layout.addWidget(labels_box, 1, 1)
+
+        stats_layout.addLayout(main_stats_layout)
+
+        completion_group = QGroupBox("Completion Rate")
+        completion_group.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+        """)
+        completion_layout = QVBoxLayout(completion_group)
+
+        tasks_progress_layout = QHBoxLayout()
+        tasks_progress_label = QLabel("Tasks:")
+        tasks_progress_label.setStyleSheet("color: #aaa; font-size: 12px;")
+        tasks_progress_layout.addWidget(tasks_progress_label)
+
+        tasks_progress_layout.addStretch()
+
+        self.stats_completed_tasks = QLabel("0/0")
+        self.stats_completed_tasks.setStyleSheet("color: #2ecc71; font-weight: bold; font-size: 12px;")
+        tasks_progress_layout.addWidget(self.stats_completed_tasks)
+
+        completion_layout.addLayout(tasks_progress_layout)
+
+        self.tasks_progress_bar = QProgressBar()
+        self.tasks_progress_bar.setTextVisible(True)
+        self.tasks_progress_bar.setFormat("%p%")
+        self.tasks_progress_bar.setStyleSheet("""
+            QProgressBar {
+                height: 12px;
+                border: 1px solid #444;
+                border-radius: 6px;
+            }
+            QProgressBar::chunk {
+                background-color: #2ecc71;
+                border-radius: 5px;
+            }
+        """)
+        self.tasks_progress_bar.setValue(0)
+        completion_layout.addWidget(self.tasks_progress_bar)
+
+        subtasks_progress_layout = QHBoxLayout()
+        subtasks_progress_label = QLabel("Subtasks:")
+        subtasks_progress_label.setStyleSheet("color: #aaa; font-size: 12px;")
+        subtasks_progress_layout.addWidget(subtasks_progress_label)
+
+        subtasks_progress_layout.addStretch()
+
+        self.stats_completed_subtasks = QLabel("0/0")
+        self.stats_completed_subtasks.setStyleSheet("color: #9b59b6; font-weight: bold; font-size: 12px;")
+        subtasks_progress_layout.addWidget(self.stats_completed_subtasks)
+
+        completion_layout.addLayout(subtasks_progress_layout)
+
+        self.subtasks_progress_bar = QProgressBar()
+        self.subtasks_progress_bar.setTextVisible(True)
+        self.subtasks_progress_bar.setFormat("%p%")
+        self.subtasks_progress_bar.setStyleSheet("""
+            QProgressBar {
+                height: 12px;
+                border: 1px solid #444;
+                border-radius: 6px;
+            }
+            QProgressBar::chunk {
+                background-color: #9b59b6;
+                border-radius: 5px;
+            }
+        """)
+        self.subtasks_progress_bar.setValue(0)
+        completion_layout.addWidget(self.subtasks_progress_bar)
+
+        stats_layout.addWidget(completion_group)
+
+        data_info_layout = QHBoxLayout()
+
+        data_info_label = QLabel("💾")
+        data_info_label.setStyleSheet("font-size: 12px;")
+        data_info_layout.addWidget(data_info_label)
+
+        data_path_label = QLabel("~/.project_manager")
+        data_path_label.setStyleSheet("color: #888; font-size: 10px; font-family: monospace;")
+        data_info_layout.addWidget(data_path_label)
+
+        data_info_layout.addStretch()
+
+        refresh_stats_btn = QPushButton("🔄")
+        refresh_stats_btn.setFixedSize(24, 24)
+        refresh_stats_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                color: #3498db;
+            }
+        """)
+        refresh_stats_btn.clicked.connect(self.update_statistics)
+        refresh_stats_btn.setToolTip("Refresh statistics")
+        data_info_layout.addWidget(refresh_stats_btn)
+
+        stats_layout.addLayout(data_info_layout)
+
         left_layout.addWidget(stats_group)
-
         left_layout.addStretch()
         main_layout.addWidget(left_panel)
 
@@ -1011,11 +1250,34 @@ class MainWindow(QMainWindow):
     def update_statistics(self):
         stats = self.manager.get_statistics()
 
-        self.stats_projects.setText(f"Projects: {stats['projects']}")
-        self.stats_tasks.setText(f"Tasks: {stats['tasks']}")
-        self.stats_subtasks.setText(f"Subtasks: {stats['subtasks']}")
-        self.stats_labels.setText(f"Labels: {stats['labels']}")
-        self.stats_completed.setText(f"Completed: {stats['task_completion_rate']:.1f}%")
+        self.stats_projects.setText(str(stats['projects']))
+        self.stats_tasks.setText(str(stats['tasks']))
+        self.stats_subtasks.setText(str(stats['subtasks']))
+        self.stats_labels.setText(str(stats['labels']))
+
+        tasks_completed = stats['completed_tasks']
+        tasks_total = stats['tasks']
+        tasks_percentage = stats['task_completion_rate']
+
+        self.stats_completed_tasks.setText(f"{tasks_completed}/{tasks_total}")
+        self.tasks_progress_bar.setValue(int(tasks_percentage))
+
+        subtasks_completed = stats['completed_subtasks']
+        subtasks_total = stats['subtasks']
+        subtasks_percentage = stats['subtask_completion_rate']
+
+        self.stats_completed_subtasks.setText(f"{subtasks_completed}/{subtasks_total}")
+        self.subtasks_progress_bar.setValue(int(subtasks_percentage))
+
+        if tasks_total > 0:
+            self.tasks_progress_bar.setFormat(f"{tasks_percentage:.1f}%")
+        else:
+            self.tasks_progress_bar.setFormat("No tasks")
+
+        if subtasks_total > 0:
+            self.subtasks_progress_bar.setFormat(f"{subtasks_percentage:.1f}%")
+        else:
+            self.subtasks_progress_bar.setFormat("No subtasks")
 
     def import_data(self):
         file_path, _ = QFileDialog.getOpenFileName(
