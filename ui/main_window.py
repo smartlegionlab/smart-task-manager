@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QMenu, QAction, QGridLayout,
     QDesktopWidget, QStatusBar, QMainWindow,
     QTreeWidget, QTreeWidgetItem, QProgressBar,
-    QToolBar, QFileDialog
+    QFileDialog
 )
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt
@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.setup_menu_bar()
-        self.setup_toolbar()
         self.setup_ui()
         self.setup_status_bar()
 
@@ -136,24 +135,6 @@ class MainWindow(QMainWindow):
         help_action.setShortcut('F1')
         help_action.triggered.connect(self.show_help)
         help_menu.addAction(help_action)
-
-    def setup_toolbar(self):
-        toolbar = QToolBar()
-        self.addToolBar(toolbar)
-
-        new_project_btn = QPushButton('New Project')
-        new_project_btn.clicked.connect(self.create_project)
-        toolbar.addWidget(new_project_btn)
-
-        new_task_btn = QPushButton('New Task')
-        new_task_btn.clicked.connect(self.create_task)
-        toolbar.addWidget(new_task_btn)
-
-        toolbar.addSeparator()
-
-        refresh_btn = QPushButton('Refresh')
-        refresh_btn.clicked.connect(self.refresh_view)
-        toolbar.addWidget(refresh_btn)
 
     def setup_ui(self):
         main_layout = QHBoxLayout(self.central_widget)
@@ -437,21 +418,38 @@ class MainWindow(QMainWindow):
 
         tasks_header_layout.addStretch()
 
+        self.btn_refresh = QPushButton('🔄 Refresh')
+        self.btn_refresh.clicked.connect(self.refresh_view)
+        self.btn_refresh.setStyleSheet("""
+                QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    font-weight: bold;
+                    padding: 8px 16px;
+                    border-radius: 5px;
+                }
+                QPushButton:hover {
+                    background-color: #2980b9;
+                }
+            """)
+        self.btn_refresh.setToolTip("Refresh view (F5)")
+        tasks_header_layout.addWidget(self.btn_refresh)
+
         self.btn_new_task = QPushButton('+ New Task')
         self.btn_new_task.clicked.connect(self.create_task)
         self.btn_new_task.setEnabled(False)
         self.btn_new_task.setStyleSheet("""
-            QPushButton {
-                background-color: #27ae60;
-                color: white;
-                font-weight: bold;
-                padding: 8px 16px;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #219653;
-            }
-        """)
+                QPushButton {
+                    background-color: #27ae60;
+                    color: white;
+                    font-weight: bold;
+                    padding: 8px 16px;
+                    border-radius: 5px;
+                }
+                QPushButton:hover {
+                    background-color: #219653;
+                }
+            """)
         tasks_header_layout.addWidget(self.btn_new_task)
 
         right_layout.addLayout(tasks_header_layout)
