@@ -55,15 +55,8 @@ class ProjectManager:
         save_json(self.data_file, data)
 
     def create_project(self, name: str, version: str = "1.0.0",
-                       description: Optional[str] = None, labels: Optional[List[str]] = None) -> Project:
+                      description: Optional[str] = None) -> Project:
         project = Project(name=name, version=version, description=description)
-
-        if labels:
-            for label_id in labels:
-                label = self.get_label(label_id)
-                if label:
-                    project.add_label(label_id)
-
         self.projects[project.id] = project
         self.save_data()
         return project
@@ -74,14 +67,6 @@ class ProjectManager:
     def update_project(self, project_id: str, **kwargs):
         project = self.get_project(project_id)
         if project:
-            if 'labels' in kwargs:
-                labels = kwargs.pop('labels')
-                project.labels.clear()
-                for label_id in labels:
-                    label = self.get_label(label_id)
-                    if label:
-                        project.add_label(label_id)
-
             for key, value in kwargs.items():
                 if hasattr(project, key):
                     setattr(project, key, value)
@@ -236,10 +221,6 @@ class ProjectManager:
             self.save_data()
 
     def delete_label(self, label_id: str):
-        for project in self.projects.values():
-            if label_id in project.labels:
-                project.labels.remove(label_id)
-
         for task in self.tasks.values():
             if label_id in task.labels:
                 task.labels.remove(label_id)
@@ -253,19 +234,6 @@ class ProjectManager:
 
     def get_all_labels(self) -> List[Label]:
         return list(self.labels.values())
-
-    def add_label_to_project(self, project_id: str, label_id: str):
-        project = self.get_project(project_id)
-        label = self.get_label(label_id)
-        if project and label:
-            project.add_label(label_id)
-            self.save_data()
-
-    def remove_label_from_project(self, project_id: str, label_id: str):
-        project = self.get_project(project_id)
-        if project:
-            project.remove_label(label_id)
-            self.save_data()
 
     def add_label_to_task(self, task_id: str, label_id: str):
         task = self.get_task(task_id)

@@ -494,7 +494,11 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', 'Project name is required')
                 return
 
-            project = self.manager.create_project(**data)
+            project = self.manager.create_project(
+                name=data['name'],
+                version=data['version'],
+                description=data.get('description')
+            )
             self.load_projects()
 
             for i in range(self.projects_tree.topLevelItemCount()):
@@ -523,7 +527,12 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', 'Project name is required')
                 return
 
-            self.manager.update_project(project.id, **data)
+            self.manager.update_project(
+                project.id,
+                name=data['name'],
+                version=data['version'],
+                description=data.get('description')
+            )
             self.load_projects()
 
             if self.current_project_id == project.id:

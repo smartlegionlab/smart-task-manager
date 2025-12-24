@@ -12,19 +12,17 @@ class Project:
     name: str
     version: str
     description: Optional[str] = None
-    labels: List[str] = field(default_factory=list)
     tasks: List[str] = field(default_factory=list)
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
     def __init__(self, name: str, version: str = "1.0.0",
-                 description: Optional[str] = None, labels: Optional[List[str]] = None,
+                 description: Optional[str] = None,
                  id: Optional[str] = None):
         self.id = id or generate_id()
         self.name = name
         self.version = version
         self.description = description
-        self.labels = labels or []
         self.tasks = []
         self.created_at = format_datetime()
         self.updated_at = self.created_at
@@ -45,19 +43,6 @@ class Project:
             self.tasks.remove(task_id)
             self.updated_at = format_datetime()
 
-    def has_label(self, label_id: str) -> bool:
-        return label_id in self.labels
-
-    def add_label(self, label_id: str):
-        if label_id not in self.labels:
-            self.labels.append(label_id)
-            self.updated_at = format_datetime()
-
-    def remove_label(self, label_id: str):
-        if label_id in self.labels:
-            self.labels.remove(label_id)
-            self.updated_at = format_datetime()
-
     def get_progress(self, all_tasks: Dict[str, Task]) -> float:
         if not self.tasks:
             return 0.0
@@ -76,7 +61,6 @@ class Project:
             "name": self.name,
             "version": self.version,
             "description": self.description,
-            "labels": self.labels,
             "tasks": self.tasks,
             "created_at": self.created_at,
             "updated_at": self.updated_at
@@ -88,8 +72,7 @@ class Project:
             id=data['id'],
             name=data['name'],
             version=data['version'],
-            description=data.get('description'),
-            labels=data.get('labels', [])
+            description=data.get('description')
         )
         project.tasks = data.get('tasks', [])
         project.created_at = data.get('created_at')
