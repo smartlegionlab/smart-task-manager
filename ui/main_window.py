@@ -530,16 +530,16 @@ class MainWindow(QMainWindow):
 
         top_line.addStretch()
 
-        self.project_version_badge = QLabel("v--")
+        self.project_version_badge = QLabel("v-- | --")
         self.project_version_badge.setStyleSheet("""
                     QLabel {
-                        background-color: #9b59b6;
+                        background-color: #95a5a6;
                         color: white;
                         padding: 3px 8px;
                         border-radius: 10px;
                         font-weight: bold;
                         font-size: 10px;
-                        min-width: 50px;
+                        min-width: 90px;
                         text-align: center;
                     }
                 """)
@@ -569,21 +569,6 @@ class MainWindow(QMainWindow):
         progress_line.addWidget(progress_label)
 
         progress_line.addStretch()
-
-        self.project_status_badge = QLabel("⏳ Not Loaded")
-        self.project_status_badge.setStyleSheet("""
-                    QLabel {
-                        background-color: #95a5a6;
-                        color: white;
-                        padding: 3px 8px;
-                        border-radius: 10px;
-                        font-weight: bold;
-                        font-size: 10px;
-                        min-width: 90px;
-                        text-align: center;
-                    }
-                """)
-        progress_line.addWidget(self.project_status_badge)
 
         progress_layout.addLayout(progress_line)
 
@@ -808,8 +793,8 @@ class MainWindow(QMainWindow):
             status_text = "⏳ Not Started"
             status_color = "#95a5a6"
 
-        self.project_status_badge.setText(status_text)
-        self.project_status_badge.setStyleSheet(f"""
+        self.project_version_badge.setText(f"v{project.version} | {status_text}")
+        self.project_version_badge.setStyleSheet(f"""
             QLabel {{
                 background-color: {status_color};
                 color: white;
