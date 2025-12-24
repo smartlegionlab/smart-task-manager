@@ -1,4 +1,3 @@
-# Copyright (©) 2025, Alexander Suvorov. All rights reserved.
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QTextEdit, QMessageBox, QFrame, QListWidget, QWidget, QGridLayout, QComboBox, QDateEdit

@@ -1,4 +1,3 @@
-# Copyright (©) 2025, Alexander Suvorov. All rights reserved.
 from datetime import datetime
 from typing import Optional
 
@@ -219,9 +218,6 @@ class MainWindow(QMainWindow):
 
         left_layout.addLayout(project_actions_layout)
 
-        self.project_progress = ProgressWidget()
-        left_layout.addWidget(self.project_progress)
-
         stats_group = QGroupBox("📊 Statistics")
         stats_group.setStyleSheet("""
             QGroupBox {
@@ -328,9 +324,181 @@ class MainWindow(QMainWindow):
         self.tasks_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.tasks_table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeToContents)
 
-        right_layout.addWidget(self.tasks_table)
+        right_layout.addWidget(self.tasks_table, 3)
+
+        self.project_progress_group = QGroupBox("📊 Project Progress")
+        self.project_progress_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #444;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #2a82da;
+            }
+        """)
+
+        self.project_progress_layout = QVBoxLayout(self.project_progress_group)
+
+        progress_top_layout = QHBoxLayout()
+
+        self.project_progress_bar = QProgressBar()
+        self.project_progress_bar.setTextVisible(True)
+        self.project_progress_bar.setFormat("Progress: %p%")
+        self.project_progress_bar.setStyleSheet("""
+            QProgressBar {
+                height: 25px;
+                border: 2px solid #444;
+                border-radius: 5px;
+                text-align: center;
+                font-weight: bold;
+            }
+            QProgressBar::chunk {
+                background-color: qlineargradient(
+                    spread:pad, x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #3498db,
+                    stop:1 #2ecc71
+                );
+                border-radius: 3px;
+            }
+        """)
+        progress_top_layout.addWidget(self.project_progress_bar)
+
+        self.project_status_label = QLabel("Status: Not Loaded")
+        self.project_status_label.setStyleSheet("""
+            QLabel {
+                background-color: #555;
+                color: white;
+                padding: 5px 15px;
+                border-radius: 5px;
+                font-weight: bold;
+                min-width: 120px;
+                text-align: center;
+            }
+        """)
+        progress_top_layout.addWidget(self.project_status_label)
+
+        self.project_progress_layout.addLayout(progress_top_layout)
+
+        progress_middle_layout = QGridLayout()
+
+        self.project_tasks_total = QLabel("Total Tasks: 0")
+        self.project_tasks_total.setStyleSheet("font-size: 12px; color: #aaa;")
+        progress_middle_layout.addWidget(self.project_tasks_total, 0, 0)
+
+        self.project_tasks_completed = QLabel("Completed Tasks: 0")
+        self.project_tasks_completed.setStyleSheet("font-size: 12px; color: #2ecc71;")
+        progress_middle_layout.addWidget(self.project_tasks_completed, 0, 1)
+
+        self.project_subtasks_total = QLabel("Total Subtasks: 0")
+        self.project_subtasks_total.setStyleSheet("font-size: 12px; color: #aaa;")
+        progress_middle_layout.addWidget(self.project_subtasks_total, 1, 0)
+
+        self.project_subtasks_completed = QLabel("Completed Subtasks: 0")
+        self.project_subtasks_completed.setStyleSheet("font-size: 12px; color: #2ecc71;")
+        progress_middle_layout.addWidget(self.project_subtasks_completed, 1, 1)
+
+        progress_middle_layout.setColumnStretch(2, 1)
+        self.project_progress_layout.addLayout(progress_middle_layout)
+
+        progress_bottom_layout = QHBoxLayout()
+
+        self.project_created_label = QLabel("Created: --")
+        self.project_created_label.setStyleSheet("font-size: 11px; color: #888;")
+        progress_bottom_layout.addWidget(self.project_created_label)
+
+        self.project_updated_label = QLabel("Updated: --")
+        self.project_updated_label.setStyleSheet("font-size: 11px; color: #888;")
+        progress_bottom_layout.addWidget(self.project_updated_label)
+
+        progress_bottom_layout.addStretch()
+
+        self.project_version_label = QLabel("Version: --")
+        self.project_version_label.setStyleSheet("font-size: 11px; color: #3498db; font-weight: bold;")
+        progress_bottom_layout.addWidget(self.project_version_label)
+
+        self.project_progress_layout.addLayout(progress_bottom_layout)
+
+        self.project_progress_group.setVisible(False)
+        right_layout.addWidget(self.project_progress_group)
 
         main_layout.addWidget(right_panel, 1)
+
+    def update_project_progress_panel(self, project_id: str):
+        project = self.manager.get_project(project_id)
+        if not project:
+            self.project_progress_group.setVisible(False)
+            return
+
+        self.project_progress_group.setVisible(True)
+        self.project_progress_group.setTitle(f"📊 Project: {project.name}")
+
+        tasks = self.manager.get_tasks_by_project(project_id)
+        total_tasks = len(tasks)
+        completed_tasks = sum(1 for task in tasks if task.completed)
+
+        total_subtasks = 0
+        completed_subtasks = 0
+
+        for task in tasks:
+            subtasks = self.manager.get_subtasks_by_task(task.id)
+            total_subtasks += len(subtasks)
+            completed_subtasks += sum(1 for subtask in subtasks if subtask.completed)
+
+        progress = self.manager.get_project_progress(project_id)
+        self.project_progress_bar.setValue(int(progress))
+
+        if progress == 100:
+            status_text = "✅ Completed"
+            status_color = "#2e7d32"
+        elif progress > 70:
+            status_text = "⚡ In Progress"
+            status_color = "#2ecc71"
+        elif progress > 30:
+            status_text = "🔄 Active"
+            status_color = "#3498db"
+        elif progress > 0:
+            status_text = "🟡 Started"
+            status_color = "#f39c12"
+        else:
+            status_text = "⏳ Not Started"
+            status_color = "#95a5a6"
+
+        self.project_status_label.setText(f"Status: {status_text}")
+        self.project_status_label.setStyleSheet(f"""
+            QLabel {{
+                background-color: {status_color};
+                color: white;
+                padding: 5px 15px;
+                border-radius: 5px;
+                font-weight: bold;
+                min-width: 120px;
+                text-align: center;
+            }}
+        """)
+
+        self.project_tasks_total.setText(f"Total Tasks: {total_tasks}")
+        self.project_tasks_completed.setText(f"Completed Tasks: {completed_tasks}")
+        self.project_subtasks_total.setText(f"Total Subtasks: {total_subtasks}")
+        self.project_subtasks_completed.setText(f"Completed Subtasks: {completed_subtasks}")
+
+        if project.created_at:
+            created_date = project.created_at[:10] if len(project.created_at) >= 10 else project.created_at
+            self.project_created_label.setText(f"Created: {created_date}")
+
+        if project.updated_at:
+            updated_date = project.updated_at[:10] if len(project.updated_at) >= 10 else project.updated_at
+            self.project_updated_label.setText(f"Updated: {updated_date}")
+
+        self.project_version_label.setText(f"Version: {project.version}")
+
+        if project.description:
+            self.project_progress_group.setToolTip(f"Description: {project.description}")
 
     def setup_status_bar(self):
         self.status_bar = QStatusBar()
@@ -374,8 +542,7 @@ class MainWindow(QMainWindow):
         if project:
             self.tasks_header.setText(f'📋 Tasks in "{project.name}"')
 
-            progress = self.manager.get_project_progress(project.id)
-            self.project_progress.set_progress(progress)
+            self.update_project_progress_panel(project.id)
 
             self.load_tasks_for_project(project.id)
 
@@ -510,8 +677,7 @@ class MainWindow(QMainWindow):
 
                 self.load_projects()
 
-                progress = self.manager.get_project_progress(self.current_project_id)
-                self.project_progress.set_progress(progress)
+                self.update_project_progress_panel(self.current_project_id)
 
     def create_project(self):
         dialog = ProjectDialog(self, manager=self.manager)
@@ -576,11 +742,14 @@ class MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             self.manager.delete_project(project.id)
             self.current_project_id = None
+            self.selected_project_item = None
             self.btn_delete_project.setEnabled(False)
             self.btn_new_task.setEnabled(False)
             self.tasks_header.setText('Select a project to view tasks')
             self.tasks_table.setRowCount(0)
-            self.project_progress.set_progress(0)
+
+            self.project_progress_group.setVisible(False)
+
             self.load_projects()
 
     def create_task(self):
@@ -603,8 +772,7 @@ class MainWindow(QMainWindow):
 
             self.load_projects()
 
-            progress = self.manager.get_project_progress(self.current_project_id)
-            self.project_progress.set_progress(progress)
+            self.update_project_progress_panel(self.current_project_id)
 
             QMessageBox.information(self, 'Success', f'Task "{task.title}" created')
 
@@ -630,8 +798,7 @@ class MainWindow(QMainWindow):
 
                 self.load_projects()
 
-                progress = self.manager.get_project_progress(self.current_project_id)
-                self.project_progress.set_progress(progress)
+                self.update_project_progress_panel(self.current_project_id)
 
     def on_task_updated(self):
         if self.current_project_id:
@@ -640,8 +807,7 @@ class MainWindow(QMainWindow):
 
             self.load_projects()
 
-            progress = self.manager.get_project_progress(self.current_project_id)
-            self.project_progress.set_progress(progress)
+            self.update_project_progress_panel(self.current_project_id)
 
     def delete_task(self, task_id: str):
         task = self.manager.get_task(task_id)
@@ -664,8 +830,7 @@ class MainWindow(QMainWindow):
 
                 self.load_projects()
 
-                progress = self.manager.get_project_progress(self.current_project_id)
-                self.project_progress.set_progress(progress)
+                self.update_project_progress_panel(self.current_project_id)
 
     def manage_labels(self):
         dialog = LabelManagerDialog(self, self.manager)
@@ -836,10 +1001,7 @@ class MainWindow(QMainWindow):
         self.load_projects()
         if self.current_project_id:
             self.load_tasks_for_project(self.current_project_id)
-            project = self.manager.get_project(self.current_project_id)
-            if project:
-                progress = self.manager.get_project_progress(project.id)
-                self.project_progress.set_progress(progress)
+            self.update_project_progress_panel(self.current_project_id)
 
         self.status_bar.showMessage('View refreshed', 3000)
 

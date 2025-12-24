@@ -1,4 +1,3 @@
-# Copyright (©) 2025, Alexander Suvorov. All rights reserved.
 from typing import Dict, Optional
 from dataclasses import dataclass
 

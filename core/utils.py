@@ -1,4 +1,3 @@
-# Copyright (©) 2025, Alexander Suvorov. All rights reserved.
 import json
 import os
 from datetime import datetime
