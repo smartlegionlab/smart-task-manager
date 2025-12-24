@@ -426,14 +426,15 @@ class MainWindow(QMainWindow):
 
             labels_widget = QWidget()
             labels_layout = QHBoxLayout(labels_widget)
-            labels_layout.setContentsMargins(5, 0, 5, 0)
-            labels_layout.setSpacing(3)
+            labels_layout.setContentsMargins(5, 2, 5, 2)
+            labels_layout.setSpacing(5)
 
             for label_id in task.labels:
                 label = self.manager.get_label(label_id)
                 if label:
                     label_widget = LabelWidget(label.name, label.color)
-                    label_widget.setFixedHeight(20)
+                    label_widget.setMinimumHeight(24)
+                    label_widget.setMinimumWidth(60)
                     labels_layout.addWidget(label_widget)
 
             labels_layout.addStretch()

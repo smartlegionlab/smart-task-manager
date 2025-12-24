@@ -1,63 +1,41 @@
 # Copyright (©) 2025, Alexander Suvorov. All rights reserved.
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
 
 
 class LabelWidget(QWidget):
 
     def __init__(self, label_name: str, color: str, parent=None):
         super().__init__(parent)
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(6, 3, 6, 3)
-        self.layout.setSpacing(5)
+        self.label_name = label_name
+        self.color = QColor(color)
+        self.setMinimumHeight(28)
+        self.setMinimumWidth(60)
 
-        self.color_indicator = QLabel()
-        self.color_indicator.setFixedSize(12, 12)
-        self.color_indicator.setStyleSheet(f"""
-            background-color: {color};
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        """)
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
 
-        self.text_label = QLabel(label_name)
-        self.text_label.setStyleSheet("""
-            font-size: 11px;
-            font-weight: 500;
-            padding: 1px 0px;
-        """)
+        width = self.width()
+        height = self.height()
 
-        self.layout.addWidget(self.color_indicator)
-        self.layout.addWidget(self.text_label)
-        self.layout.addStretch()
+        painter.setBrush(self.color)
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(0, 0, width, height, 4, 4)
 
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {self.adjust_color_brightness(color, 0.2)};
-                border: 1px solid {self.adjust_color_brightness(color, 0.1)};
-                border-radius: 4px;
-                padding: 0px;
-            }}
-        """)
-        self.setFixedHeight(24)
+        painter.setPen(QColor(255, 255, 255, 50))
+        painter.drawRoundedRect(0, 0, width, height, 4, 4)
 
-    def adjust_color_brightness(self, color_hex: str, factor: float) -> str:
-        color = QColor(color_hex)
-        h, s, v, a = color.getHsv()
-        v = min(255, int(v * (1 - factor)))
-        return QColor.fromHsv(h, s, v, a).name()
+        painter.setPen(Qt.white)
+        font = QFont("Arial", 9)
+        font.setBold(True)
+        painter.setFont(font)
+
+        text_rect = QRect(0, 0, width, height)
+        painter.drawText(text_rect, Qt.AlignCenter, self.label_name)
 
     def set_label(self, label_name: str, color: str):
-        self.color_indicator.setStyleSheet(f"""
-            background-color: {color};
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        """)
-        self.text_label.setText(label_name)
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {self.adjust_color_brightness(color, 0.2)};
-                border: 1px solid {self.adjust_color_brightness(color, 0.1)};
-                border-radius: 4px;
-                padding: 0px;
-            }}
-        """)
+        self.label_name = label_name
+        self.color = QColor(color)
+        self.update()
