@@ -229,8 +229,9 @@ class LabelManagerDialog(QDialog):
                 background-color: #3a3a3a;
             }
             QListWidget::item:selected {
-                background-color: #2a82da;
+                background-color: rgba(42, 130, 218, 90);
                 color: white;
+                border: 1px solid #2a82da;
             }
         """)
         self.layout.addWidget(self.labels_list)
