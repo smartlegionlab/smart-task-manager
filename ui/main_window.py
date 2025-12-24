@@ -326,14 +326,18 @@ class MainWindow(QMainWindow):
         self.tasks_progress_bar.setFormat("%p%")
         self.tasks_progress_bar.setStyleSheet("""
             QProgressBar {
-                height: 10px;
+                height: 14px;
                 border: 1px solid #444;
-                border-radius: 5px;
+                border-radius: 7px;
+                text-align: center;
+                padding: 0px 2px;
                 font-size: 9px;
+                font-weight: bold;
+                color: white;
             }
             QProgressBar::chunk {
                 background-color: #2ecc71;
-                border-radius: 4px;
+                border-radius: 6px;
             }
         """)
         self.tasks_progress_bar.setValue(0)
@@ -357,14 +361,18 @@ class MainWindow(QMainWindow):
         self.subtasks_progress_bar.setFormat("%p%")
         self.subtasks_progress_bar.setStyleSheet("""
             QProgressBar {
-                height: 10px;
+                height: 14px;
                 border: 1px solid #444;
-                border-radius: 5px;
+                border-radius: 7px;
+                text-align: center;
+                padding: 0px 2px;
                 font-size: 9px;
+                font-weight: bold;
+                color: white;
             }
             QProgressBar::chunk {
                 background-color: #9b59b6;
-                border-radius: 4px;
+                border-radius: 6px;
             }
         """)
         self.subtasks_progress_bar.setValue(0)
