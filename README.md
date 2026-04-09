@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.1.2</sup>
+# Smart Task Manager <sup>v1.1.3</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an 
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
@@ -13,7 +13,7 @@ intuitive dark theme interface, priority-based organization, and automatic data 
 
 ---
 
-## 📋 Overview
+## Overview
 
 **Smart Task Manager** is a feature-rich desktop application designed to help you 
 efficiently organize and track your tasks. With a clean dark-themed interface, 
@@ -21,36 +21,46 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 
 ---
 
-## ✨ Features
+## ⚠️ Disclaimer
 
-### 📝 Task Management
+**By using this software, you agree to the full disclaimer terms.**
+
+**Summary:** Software provided "AS IS" without warranty. You assume all risks.
+
+**Full legal disclaimer:** See [DISCLAIMER.md](https://github.com/smartlegionlab/smart-task-manager/blob/master/DISCLAIMER.md)
+
+---
+
+## Features
+
+### Task Management
 - **Create tasks** with title, description, priority, and due date
 - **Edit tasks** anytime with full detail modification
 - **View task details** in a dedicated dialog
 - **Delete tasks** individually or clear completed tasks in bulk
 
-### 🎯 Priority System
-- **Three priority levels**: 🚨 High, ⚠️ Medium, 📋 Low
+### Priority System
+- **Three priority levels**: **High**, **Medium**, **Low**
 - **Color-coded visual indicators** for quick identification
 
-### ✅ Task Status
+### Task Status
 - **Toggle completion status** with one click
 - **Visual strikethrough** for completed tasks
 - **Overdue task highlighting** (red text for overdue items)
 
-### 📊 Data Management
+### Data Management
 - **Automatic saving** to `~/.todos.json`
 - **Persistent storage** between sessions
 - **JSON-based data format** for easy backup and migration
 - **Statistics tracking** (total, completed, pending tasks)
 
-### 🖥️ User Interface
+### User Interface
 - **Dark theme** with modern styling
 - **Responsive table layout** with resizable columns
 - **Context menu** for quick actions (right-click on tasks)
 - **Task statistics** displayed in real-time
 
-### 🎨 Additional Features
+### Additional Features
 - **Due date calendar picker** with visual date selection
 - **Task descriptions** with word wrap
 - **Overdue task notifications** (visual indicators)
@@ -59,7 +69,7 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.7 or higher
@@ -90,7 +100,7 @@ git clone https://github.com/smartlegionlab/smart-task-manager.git && cd smart-t
 
 ---
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### Creating a New Task
 1. Click the **"➕ Add Task"** button
@@ -120,7 +130,7 @@ Right-click on any task in the table to access:
 
 ---
 
-## 🗂️ Data Storage
+## Data Storage
 
 ### File Location
 Tasks are automatically saved to:
@@ -149,7 +159,7 @@ Tasks are automatically saved to:
 
 ---
 
-## 📦 Windows Standalone Executable
+## Windows Standalone Executable
 
 ### Creating a Single-File *.exe
 
@@ -165,7 +175,7 @@ Build a standalone `smart_task_manager.exe` that runs without Python installatio
 #### Step 2: Install Python
 1. Download Python installer from: https://python.org/downloads/
 2. Run installer
-3. **IMPORTANT:** Check ✅ "Add Python to PATH"
+3. **IMPORTANT:** Check "Add Python to PATH"
 4. Click "Install Now"
 
 #### Step 3: Open Command Prompt
@@ -223,7 +233,7 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-ho
 
 ---
 
-## 🛠️ Technical Details
+## Technical Details
 
 ### Architecture
 - **Model**: `Task` class representing individual tasks
@@ -242,13 +252,13 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-ho
 
 ---
 
-## 🎨 Screenshots
+## Screenshots
 
 ![Main Interface](https://github.com/smartlegionlab/smart-task-manager/raw/master/data/images/smart-task-manager.png)
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -271,28 +281,13 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-ho
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](LICENSE) file for details.
-
-```text
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-```
+This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](https://github.com/smartlegionlab/smart-task-manager/blob/master/LICENSE) file for details.
 
 ---
 
-## 👤 Author
+## Author
 
 **Alexander Suvorov**
 - GitHub: [@smartlegionlab](https://github.com/smartlegionlab)
@@ -300,7 +295,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## 🌟 Acknowledgments
+## Acknowledgments
 
 - Built with [PyQt5](https://www.riverbankcomputing.com/software/pyqt/)
 - Inspired by modern task management applications
