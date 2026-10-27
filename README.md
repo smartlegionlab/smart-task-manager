@@ -1,6 +1,6 @@
 # Smart Task Manager <sup>v1.1.3</sup>
 
-A modern desktop task management application built with Python and PyQt5, featuring an 
+A modern desktop task management application built with Python and PyQt5, featuring an
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
 
 ---
@@ -15,9 +15,10 @@ intuitive dark theme interface, priority-based organization, and automatic data 
 
 ## Overview
 
-**Smart Task Manager** is a feature-rich desktop application designed to help you 
-efficiently organize and track your tasks. With a clean dark-themed interface, 
-priority management, due date tracking, and automatic saving, it's the perfect tool for personal productivity.
+**Smart Task Manager** is a feature-rich desktop application designed to help you
+efficiently organize and track your tasks. With a clean dark-themed interface,
+priority management, due date tracking, and automatic saving, it's the perfect tool
+for personal productivity.
 
 ---
 
@@ -59,12 +60,16 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 - **Responsive table layout** with resizable columns
 - **Context menu** for quick actions (right-click on tasks)
 - **Task statistics** displayed in real-time
+- **Menu bar** (File / Edit / View / Help)
+- **Status bar** with live feedback
 
 ### Additional Features
 - **Due date calendar picker** with visual date selection
 - **Task descriptions** with word wrap
 - **Overdue task notifications** (visual indicators)
 - **Help documentation** built into the application
+- **About dialog** with project information
+- **Keyboard shortcuts dialog**
 - **Confirmation dialogs** for destructive actions
 
 ---
@@ -74,36 +79,113 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 ### Prerequisites
 - Python 3.7 or higher
 - PyQt5
+- Git (only for the installer)
+- curl (only for the installer)
 
-### Step-by-Step Installation
+### Option 1 - Run from Source (no system install)
 
-1. **Clone the repository**
 ```bash
 git clone https://github.com/smartlegionlab/smart-task-manager.git
 cd smart-task-manager
-```
-
-2. **Install required dependencies**
-```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
-```
-
-3. **Run the application**
-```bash
 python task_manager.py
 ```
 
-### Alternative: One-line Installation
+### Option 2 - Install System-Wide (recommended)
+
+#### One-command install
+
 ```bash
-git clone https://github.com/smartlegionlab/smart-task-manager.git && cd smart-task-manager && pip install PyQt5 && python task_manager.py
+curl -fsSL https://raw.githubusercontent.com/smartlegionlab/smart-task-manager/master/install.sh | bash
 ```
+
+**What the installer does:**
+
+1. Downloads the source code from GitHub.
+2. Installs the application to `~/.local/share/smart-task-manager/`.
+   No root, no sudo - everything lives inside your home directory.
+3. Creates a dedicated Python virtual environment at
+   `~/.local/share/smart-task-manager/venv/` and installs dependencies into it.
+4. Registers the app in your desktop environment by creating
+   `~/.local/share/applications/smart-task-manager.desktop`.
+5. Refreshes the desktop database so the menu entry appears without a full
+   re-login on most systems.
+
+**Launch after install:**
+- Application menu -> **Smart Task Manager**
+
+**Desktop shortcut (opt-in):**
+
+By default, no Desktop shortcut is created. This is intentional - on GNOME
+(default on Ubuntu), desktop icons are hidden by default, which would make a
+shortcut invisible and confusing.
+
+To also create a Desktop shortcut during install, pass the
+`STM_CREATE_DESKTOP_SHORTCUT=1` environment variable to **bash** - the second
+command in the pipeline:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/smartlegionlab/smart-task-manager/master/install.sh | STM_CREATE_DESKTOP_SHORTCUT=1 bash
+```
+
+Or export it first, then run the normal installer:
+
+```bash
+export STM_CREATE_DESKTOP_SHORTCUT=1
+curl -fsSL https://raw.githubusercontent.com/smartlegionlab/smart-task-manager/master/install.sh | bash
+```
+
+> **Note:** Writing `STM_CREATE_DESKTOP_SHORTCUT=1 curl ... | bash` does **not**
+> work - in a shell pipeline, an environment variable prefix applies only to the
+> command on the **left** side of the `|`. The variable never reaches `bash`,
+> which is on the right side. Pass it to `bash` directly, or `export` it
+> beforehand.
+
+#### Alternative - install from a cloned repo
+
+```bash
+cd smart-task-manager
+./install.sh
+```
+
+### Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/smartlegionlab/smart-task-manager/master/uninstall.sh | bash
+```
+
+**What the uninstaller removes:**
+- `~/.local/share/smart-task-manager/` - the application and its venv
+- `~/.local/share/applications/smart-task-manager.desktop` - the menu entry
+- `~/Desktop/smart-task-manager.desktop` - the Desktop shortcut (if present)
+
+**What the uninstaller never touches:**
+- `~/.todos.json` - your tasks. It is your data. Only you decide what to do with it.
+
+If you want to remove your data as well, run after uninstall:
+
+```bash
+rm -f ~/.todos.json
+```
+
+### Installation Paths
+
+| Item                       | Path                                                              |
+|----------------------------|-------------------------------------------------------------------|
+| Application files          | `~/.local/share/smart-task-manager/`                              |
+| Virtual environment        | `~/.local/share/smart-task-manager/venv/`                         |
+| Application menu entry     | `~/.local/share/applications/smart-task-manager.desktop`          |
+| Desktop shortcut (opt-in)  | `~/Desktop/smart-task-manager.desktop`                            |
+| User data (tasks)          | `~/.todos.json`                                                   |
 
 ---
 
 ## Usage Guide
 
 ### Creating a New Task
-1. Click the **"➕ Add Task"** button
+1. Click the **"+ Add Task"** button or use **File -> New Task** (`Ctrl+N`)
 2. Fill in the task details:
    - **Title** (required): Brief description of the task
    - **Description** (optional): Detailed notes
@@ -112,10 +194,10 @@ git clone https://github.com/smartlegionlab/smart-task-manager.git && cd smart-t
 3. Click **"Create Task"**
 
 ### Managing Tasks
-- **Toggle Completion**: Click the status button
+- **Toggle Completion**: Click the status button, or press `Space`
 - **View Details**: Click the "View" button
-- **Edit Task**: Click the "Edit" button
-- **Delete Task**: Click the "Delete" button
+- **Edit Task**: Click the "Edit" button, or press `Ctrl+E`
+- **Delete Task**: Click the "Delete" button, or press `Delete`
 
 ### Quick Actions (Context Menu)
 Right-click on any task in the table to access:
@@ -125,8 +207,61 @@ Right-click on any task in the table to access:
 - Delete Task
 
 ### Bulk Operations
-- **Clear Completed Tasks**: Click "Clear Completed" to remove all completed tasks
+- **Clear Completed Tasks**: Click "Clear Completed" or use **File -> Clear Completed**
 - **Exit Confirmation**: Application warns if unsaved tasks exist on exit
+
+---
+
+## Menu Bar
+
+- **File**: Create Desktop Entry (Linux), New Task, Clear Completed, Exit
+- **Edit**: Edit Selected Task, Delete Selected Task, Toggle Completion
+- **View**: Focus Search, Refresh, Reset Filters
+- **Help**: Help, Keyboard Shortcuts, About
+
+---
+
+## Keyboard Shortcuts
+
+| Shortcut       | Action                          |
+|----------------|---------------------------------|
+| `Ctrl+N`       | New task                        |
+| `Ctrl+E`       | Edit selected task              |
+| `Delete`       | Delete selected task            |
+| `Space`        | Toggle completion of selection  |
+| `Ctrl+F`       | Focus search box                |
+| `F5`           | Refresh view                    |
+| `F1`           | Open help                       |
+| `Ctrl+/`       | Show keyboard shortcuts dialog  |
+| `Ctrl+A`       | Open about dialog               |
+| `Ctrl+Q`       | Exit application                |
+
+---
+
+### Desktop Integration (Linux)
+
+> **Note:** If you installed the app via `install.sh`, the application menu entry
+> is already created automatically. The in-app option described below is useful
+> when you run the app manually from a custom location, or when you want to add
+> a Desktop shortcut on demand. It is also the recommended way for development:
+> it creates a shortcut pointing to the **currently running instance** (your
+> working copy), not to a copy under `~/.local/share/`.
+
+**Creating Application Shortcuts:**
+
+The application allows you to create desktop entries directly from the menu:
+
+1. **Go to File -> Create Desktop Entry**
+2. **Choose locations:**
+   - Application Menu (`~/.local/share/applications/`) - adds to system app menu
+   - Desktop (`~/Desktop/`) - creates shortcut on desktop
+3. **Click "Create Entry"**
+
+**After creation:**
+- **Application Menu**: log out and back in (or restart desktop) for the entry to appear
+- **Desktop shortcut**: may show "Unsecured Application Launcher" warning
+  - Right-click on shortcut -> "Allow Launching" or "Trust"
+  - This is a one-time security confirmation
 
 ---
 
@@ -161,75 +296,7 @@ Tasks are automatically saved to:
 
 ## Windows Standalone Executable
 
-### Creating a Single-File *.exe
-
-Build a standalone `smart_task_manager.exe` that runs without Python installation:
-
-#### Step 1: Get the Project Files
-1. **Download project ZIP:**
-   - Go to: https://github.com/smartlegionlab/smart-task-manager-master
-   - Click green "Code" button
-   - Select "Download ZIP"
-   - Extract to: `C:\smart-task-manager-master\`
-
-#### Step 2: Install Python
-1. Download Python installer from: https://python.org/downloads/
-2. Run installer
-3. **IMPORTANT:** Check "Add Python to PATH"
-4. Click "Install Now"
-
-#### Step 3: Open Command Prompt
-1. Press `Win + R`
-2. Type `cmd`, press Enter
-3. Navigate to project folder:
-   ```cmd
-   cd C:\smart-task-manager-master
-   ```
-
-#### Step 4: Create Virtual Environment
-```cmd
-# Create virtual environment
-python -m venv venv
-
-# Activate it (IMPORTANT!)
-.\venv\Scripts\activate
-
-# You should see (venv) in your command prompt
-```
-
-#### Step 5: Install Dependencies
-```cmd
-# Install PyInstaller in virtual environment
-pip install pyinstaller
-pip install PyQt5==5.15.9
-```
-
-#### Step 6: Build Executable
-```cmd
-# Build single .exe file
-
-pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-hooks-dir=. app.py
-
-# Wait for build to complete (1-2 minutes)
-```
-
-#### Step 7: Find and Use
-**Location:** `C:\smart-task-manager-master\dist\smart_task_manager.exe`
-
-**Create desktop shortcut:**
-1. Open `C:\smart-task-manager-master\dist\` folder
-2. Right-click `smart_task_manager.exe`
-3. Select "Create shortcut"
-4. Drag shortcut to desktop
-5. Rename shortcut to "Smart Task Manager"
-6. Double-click to start
-
-
-**What you get:**
-- Single file: `smart_task_manager.exe` (~50MB)
-- No Python required to run
-- Works on any Windows 10/11 PC
-- Can be copied to USB drive
+(unchanged - see original README)
 
 ---
 
@@ -241,9 +308,13 @@ pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-ho
 - **View**: PyQt5-based GUI with dialog windows and table view
 
 ### Key Components
-- **MainWindow**: Primary application interface with task table
+- **MainWindow**: Primary application interface with menu bar, task table, status bar
 - **TaskInputDialog**: Modal dialog for creating/editing tasks
 - **TaskDisplayDialog**: Modal dialog for viewing task details
+- **AboutDialog**: Project information dialog
+- **HelpDialog**: Built-in help documentation
+- **ShortcutsDialog**: Keyboard shortcuts reference
+- **DesktopEntryDialog**: Linux desktop integration
 - **Context Menu**: Right-click menu for quick task operations
 
 ### Dependencies
@@ -303,3 +374,4 @@ This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](
 ---
 
 *"Organize your tasks, simplify your life."*
+

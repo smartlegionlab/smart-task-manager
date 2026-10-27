@@ -1,19 +1,23 @@
 # Copyright (©) 2025, Alexander Suvorov. All rights reserved.
+import sys
 import uuid
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QMessageBox,
     QLineEdit, QDialog, QTableWidget, QTableWidgetItem, QFrame,
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
-    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup, QDesktopWidget
+    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup,
+    QDesktopWidget, QMainWindow, QStatusBar, QTabWidget, QTabBar
 )
-from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtGui import QFont, QColor, QIcon
 from PyQt5.QtCore import Qt, QDate
 
 from core.task import Task
 from core.task_manager import TaskManager
+from core.dialogs import AboutDialog, HelpDialog, ShortcutsDialog
+from core.desktop_entry import DesktopEntryDialog
 
 
 class TaskInputDialog(QDialog):
@@ -183,18 +187,11 @@ class TaskDisplayDialog(QDialog):
         button_layout = QHBoxLayout()
 
         self.edit_button = QPushButton('Edit Task', self)
-        self.edit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #ff9800;
-                color: white;
-                border-radius: 5px;
-                padding: 8px 16px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #e68900;
-            }
-        """)
+        self.edit_button.setStyleSheet(
+            "QPushButton { background-color: #ff9800; color: white; border-radius: 5px; "
+            "padding: 8px 16px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #e68900; }"
+        )
         self.edit_button.clicked.connect(self.edit_task)
         button_layout.addWidget(self.edit_button)
 
@@ -213,7 +210,7 @@ class TaskDisplayDialog(QDialog):
         self.accept()
 
 
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle('Smart Task Manager')
@@ -222,7 +219,127 @@ class MainWindow(QWidget):
         self.todo_manager = TaskManager()
         self.all_tasks: List[Task] = []
 
-        self.main_layout = QVBoxLayout()
+        self.setup_icon()
+        self.setup_menu_bar()
+        self.setup_ui()
+        self.setup_status_bar()
+
+        self._init()
+        self.center_window()
+
+    def setup_icon(self):
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent
+        for candidate in [
+            project_root / "data" / "icons" / "icon.png",
+            project_root / "data" / "icon.png",
+            project_root / "icon.png",
+        ]:
+            if candidate.exists():
+                self.setWindowIcon(QIcon(str(candidate)))
+                break
+
+    def center_window(self):
+        frame = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        frame.moveCenter(center_point)
+        self.move(frame.topLeft())
+
+    def setup_menu_bar(self):
+        menubar = self.menuBar()
+
+        file_menu = menubar.addMenu('File')
+
+        if sys.platform.startswith('linux'):
+            desktop_entry_action = QAction('Create Desktop Entry...', self)
+            desktop_entry_action.triggered.connect(self.create_desktop_entry)
+            file_menu.addAction(desktop_entry_action)
+            file_menu.addSeparator()
+
+        new_task_action = QAction('New Task', self)
+        new_task_action.setShortcut('Ctrl+N')
+        new_task_action.triggered.connect(self.add_task)
+        file_menu.addAction(new_task_action)
+
+        file_menu.addSeparator()
+
+        clear_completed_action = QAction('Clear Completed', self)
+        clear_completed_action.triggered.connect(self.clear_completed)
+        file_menu.addAction(clear_completed_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction('Exit', self)
+        exit_action.setShortcut('Ctrl+Q')
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+        edit_menu = menubar.addMenu('Edit')
+
+        edit_selected_action = QAction('Edit Selected Task', self)
+        edit_selected_action.setShortcut('Ctrl+E')
+        edit_selected_action.triggered.connect(self.edit_selected_task)
+        edit_menu.addAction(edit_selected_action)
+
+        delete_selected_action = QAction('Delete Selected Task', self)
+        delete_selected_action.setShortcut('Delete')
+        delete_selected_action.triggered.connect(self.delete_selected_task)
+        edit_menu.addAction(delete_selected_action)
+
+        edit_menu.addSeparator()
+
+        toggle_complete_action = QAction('Toggle Completion', self)
+        toggle_complete_action.setShortcut('Space')
+        toggle_complete_action.triggered.connect(self.toggle_selected_task)
+        edit_menu.addAction(toggle_complete_action)
+
+        view_menu = menubar.addMenu('View')
+
+        focus_search_action = QAction('Focus Search', self)
+        focus_search_action.setShortcut('Ctrl+F')
+        focus_search_action.triggered.connect(self.focus_search)
+        view_menu.addAction(focus_search_action)
+
+        refresh_action = QAction('Refresh', self)
+        refresh_action.setShortcut('F5')
+        refresh_action.triggered.connect(self.refresh_view)
+        view_menu.addAction(refresh_action)
+
+        view_menu.addSeparator()
+
+        reset_filters_action = QAction('Reset Filters', self)
+        reset_filters_action.triggered.connect(self.reset_filters)
+        view_menu.addAction(reset_filters_action)
+
+        help_menu = menubar.addMenu('Help')
+
+        help_action = QAction('Help', self)
+        help_action.setShortcut('F1')
+        help_action.triggered.connect(self.show_help_dialog)
+        help_menu.addAction(help_action)
+
+        shortcuts_action = QAction('Keyboard Shortcuts', self)
+        shortcuts_action.setShortcut('Ctrl+/')
+        shortcuts_action.triggered.connect(self.show_shortcuts_dialog)
+        help_menu.addAction(shortcuts_action)
+
+        help_menu.addSeparator()
+
+        about_action = QAction('About', self)
+        about_action.setShortcut('Ctrl+A')
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(about_action)
+
+    def setup_status_bar(self):
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage('Ready')
+
+    def setup_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+
+        self.main_layout = QVBoxLayout(central)
         self.main_layout.setSpacing(15)
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
@@ -244,19 +361,12 @@ class MainWindow(QWidget):
         self.main_layout.addLayout(header_layout)
 
         search_group = QGroupBox("Search and Filters")
-        search_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #444;
-                border-radius: 5px;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px 0 5px;
-            }
-        """)
+        search_group.setStyleSheet(
+            "QGroupBox { font-weight: bold; border: 1px solid #444; "
+            "border-radius: 5px; margin-top: 10px; }"
+            "QGroupBox::title { subcontrol-origin: margin; left: 10px; "
+            "padding: 0 5px 0 5px; }"
+        )
         search_layout = QGridLayout()
         search_layout.setSpacing(10)
 
@@ -266,18 +376,11 @@ class MainWindow(QWidget):
         self.search_input = QLineEdit(self)
         self.search_input.setPlaceholderText("Search in title and description...")
         self.search_input.textChanged.connect(self.apply_filters)
-        self.search_input.setStyleSheet("""
-            QLineEdit {
-                padding: 8px;
-                border: 1px solid #555;
-                border-radius: 4px;
-                background-color: #2a2a2a;
-                color: white;
-            }
-            QLineEdit:focus {
-                border: 1px solid #2a82da;
-            }
-        """)
+        self.search_input.setStyleSheet(
+            "QLineEdit { padding: 8px; border: 1px solid #555; border-radius: 4px; "
+            "background-color: #2a2a2a; color: white; }"
+            "QLineEdit:focus { border: 1px solid #2a82da; }"
+        )
         search_layout.addWidget(self.search_input, 0, 1, 1, 3)
 
         self.status_label = QLabel('Status:')
@@ -346,18 +449,11 @@ class MainWindow(QWidget):
 
         self.reset_filters_btn = QPushButton("Reset Filters")
         self.reset_filters_btn.clicked.connect(self.reset_filters)
-        self.reset_filters_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #555;
-                color: white;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #666;
-            }
-        """)
+        self.reset_filters_btn.setStyleSheet(
+            "QPushButton { background-color: #555; color: white; border-radius: 4px; "
+            "padding: 6px 12px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #666; }"
+        )
         search_layout.addWidget(self.reset_filters_btn, 4, 3)
 
         self.status_all_radio.toggled.connect(self.apply_filters)
@@ -384,18 +480,13 @@ class MainWindow(QWidget):
         self.table_widget.setAlternatingRowColors(True)
         self.table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table_widget.customContextMenuRequested.connect(self.show_context_menu)
-        self.table_widget.setStyleSheet("""
-            QTableWidget {
-                background-color: #2a2a2a;
-                gridline-color: #444;
-            }
-            QHeaderView::section {
-                background-color: #353535;
-                padding: 8px;
-                border: 1px solid #444;
-                font-weight: bold;
-            }
-        """)
+        self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table_widget.setSelectionMode(QTableWidget.SingleSelection)
+        self.table_widget.setStyleSheet(
+            "QTableWidget { background-color: #2a2a2a; gridline-color: #444; }"
+            "QHeaderView::section { background-color: #353535; padding: 8px; "
+            "border: 1px solid #444; font-weight: bold; }"
+        )
 
         self.table_widget.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.table_widget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -413,18 +504,11 @@ class MainWindow(QWidget):
         self.btn_new_task = QPushButton('+ Add Task')
         self.btn_new_task.setMinimumHeight(40)
         self.btn_new_task.clicked.connect(self.add_task)
-        self.btn_new_task.setStyleSheet("""
-            QPushButton {
-                background-color: #2a82da;
-                color: white;
-                font-weight: bold;
-                border-radius: 5px;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #1a72ca;
-            }
-        """)
+        self.btn_new_task.setStyleSheet(
+            "QPushButton { background-color: #2a82da; color: white; font-weight: bold; "
+            "border-radius: 5px; padding: 8px 16px; }"
+            "QPushButton:hover { background-color: #1a72ca; }"
+        )
         button_layout.addWidget(self.btn_new_task)
 
         self.btn_clear_completed = QPushButton('Clear Completed')
@@ -436,24 +520,17 @@ class MainWindow(QWidget):
 
         self.btn_help = QPushButton('? Help')
         self.btn_help.setMinimumHeight(40)
-        self.btn_help.clicked.connect(self.show_help)
+        self.btn_help.clicked.connect(self.show_help_dialog)
         button_layout.addWidget(self.btn_help)
 
         self.btn_exit = QPushButton('Exit')
         self.btn_exit.setMinimumHeight(40)
         self.btn_exit.clicked.connect(self.close)
-        self.btn_exit.setStyleSheet("""
-            QPushButton {
-                background-color: #ff7d7d;
-                color: white;
-                font-weight: bold;
-                border-radius: 5px;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #ca1a1a;
-            }
-        """)
+        self.btn_exit.setStyleSheet(
+            "QPushButton { background-color: #ff7d7d; color: white; font-weight: bold; "
+            "border-radius: 5px; padding: 8px 16px; }"
+            "QPushButton:hover { background-color: #ca1a1a; }"
+        )
         button_layout.addWidget(self.btn_exit)
 
         self.main_layout.addLayout(button_layout)
@@ -467,7 +544,12 @@ class MainWindow(QWidget):
         footer_layout = QVBoxLayout()
         footer_layout.setSpacing(5)
 
-        copyright_text = 'Copyright © 2025, <a href="https://github.com/smartlegionlab" style="color: #2a82da; text-decoration: none;">Alexander Suvorov</a>. All rights reserved.'
+        copyright_text = (
+            'Copyright © 2025, '
+            '<a href="https://github.com/smartlegionlab" '
+            'style="color: #2a82da; text-decoration: none;">Alexander Suvorov</a>. '
+            'All rights reserved.'
+        )
         self.copyright_label = QLabel(copyright_text)
         self.copyright_label.setAlignment(Qt.AlignCenter)
         self.copyright_label.setStyleSheet("color: #888; font-size: 16px;")
@@ -476,20 +558,10 @@ class MainWindow(QWidget):
 
         self.main_layout.addLayout(footer_layout)
 
-        self.setLayout(self.main_layout)
-        self._init()
-        self.center_window()
-
     def _init(self):
         self.all_tasks = list(self.todo_manager.tasks.values())
         self.update_stats()
         self.apply_filters()
-
-    def center_window(self):
-        frame = self.frameGeometry()
-        center_point = QDesktopWidget().availableGeometry().center()
-        frame.moveCenter(center_point)
-        self.move(frame.topLeft())
 
     def update_stats(self):
         total = len(self.all_tasks)
@@ -503,6 +575,7 @@ class MainWindow(QWidget):
 
         title_item = QTableWidgetItem(task.title)
         title_item.setToolTip(task.description)
+        title_item.setData(Qt.UserRole, task.id)
         if task.completed:
             title_item.setForeground(QColor(100, 100, 100))
             font = title_item.font()
@@ -532,21 +605,11 @@ class MainWindow(QWidget):
         status_button = QPushButton("Completed" if task.completed else "Pending")
         status_button.setCheckable(True)
         status_button.setChecked(task.completed)
-        status_button.setStyleSheet("""
-            QPushButton {
-                border-radius: 3px;
-                padding: 5px 10px;
-                min-width: 100px;
-            }
-            QPushButton:checked {
-                background-color: #2e7d32;
-                color: white;
-            }
-            QPushButton:!checked {
-                background-color: #ff9800;
-                color: white;
-            }
-        """)
+        status_button.setStyleSheet(
+            "QPushButton { border-radius: 3px; padding: 5px 10px; min-width: 100px; }"
+            "QPushButton:checked { background-color: #2e7d32; color: white; }"
+            "QPushButton:!checked { background-color: #ff9800; color: white; }"
+        )
         status_button.clicked.connect(lambda checked, t_id=task.id: self.toggle_task_status_by_id(t_id))
         status_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 2, status_button)
@@ -563,54 +626,32 @@ class MainWindow(QWidget):
         self.table_widget.setItem(row_position, 3, due_item)
 
         view_button = QPushButton("View")
-        view_button.setStyleSheet("""
-            QPushButton {
-                background-color: #2a82da;
-                color: white;
-                border-radius: 3px;
-                padding: 5px 10px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #1a72ca;
-            }
-        """)
+        view_button.setStyleSheet(
+            "QPushButton { background-color: #2a82da; color: white; border-radius: 3px; "
+            "padding: 5px 10px; min-width: 80px; }"
+            "QPushButton:hover { background-color: #1a72ca; }"
+        )
         view_button.clicked.connect(lambda checked, t_id=task.id: self.view_task_by_id(t_id))
         view_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 4, view_button)
 
         edit_button = QPushButton("Edit")
-        edit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #ff9800;
-                color: white;
-                border-radius: 3px;
-                padding: 5px 10px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #e68900;
-            }
-        """)
+        edit_button.setStyleSheet(
+            "QPushButton { background-color: #ff9800; color: white; border-radius: 3px; "
+            "padding: 5px 10px; min-width: 80px; }"
+            "QPushButton:hover { background-color: #e68900; }"
+        )
         edit_button.clicked.connect(lambda checked, t_id=task.id: self.edit_task_by_id(t_id))
         edit_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 5, edit_button)
 
         delete_button = QPushButton("Delete")
         delete_button.setToolTip("Delete this task")
-        delete_button.setStyleSheet("""
-            QPushButton {
-                background-color: #da2a2a;
-                color: white;
-                border-radius: 3px;
-                padding: 5px;
-                min-width: 60px;
-                max-width: 60px;
-            }
-            QPushButton:hover {
-                background-color: #ca1a1a;
-            }
-        """)
+        delete_button.setStyleSheet(
+            "QPushButton { background-color: #da2a2a; color: white; border-radius: 3px; "
+            "padding: 5px; min-width: 60px; max-width: 60px; }"
+            "QPushButton:hover { background-color: #ca1a1a; }"
+        )
         delete_button.clicked.connect(lambda checked, t_id=task.id: self.delete_task_by_id(t_id))
         delete_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 6, delete_button)
@@ -749,6 +790,7 @@ class MainWindow(QWidget):
                     break
             self.apply_filters()
             self.update_stats()
+            self.status_bar.showMessage('Task status updated', 2000)
 
     def view_task_by_id(self, task_id: str):
         task = self.todo_manager.get_task(task_id)
@@ -767,17 +809,12 @@ class MainWindow(QWidget):
             inputs = dialog.get_inputs()
 
             if not inputs["title"]:
-                QMessageBox.warning(
-                    self,
-                    'Missing Information',
-                    'Please provide a task title.'
-                )
+                QMessageBox.warning(self, 'Missing Information', 'Please provide a task title.')
                 return
 
             if len(inputs["title"]) > 100:
                 QMessageBox.warning(
-                    self,
-                    'Title Too Long',
+                    self, 'Title Too Long',
                     'Task title cannot exceed 100 characters.\n'
                     f'Current length: {len(inputs["title"])} characters.'
                 )
@@ -785,8 +822,7 @@ class MainWindow(QWidget):
 
             if len(inputs["title"]) < 3:
                 QMessageBox.warning(
-                    self,
-                    'Title Too Short',
+                    self, 'Title Too Short',
                     'Task title must be at least 3 characters long.'
                 )
                 return
@@ -813,8 +849,7 @@ class MainWindow(QWidget):
             self.update_stats()
 
             QMessageBox.information(
-                self,
-                'Updated',
+                self, 'Updated',
                 f'Task "{updated_task.title}" has been updated.'
             )
 
@@ -840,8 +875,7 @@ class MainWindow(QWidget):
             self.apply_filters()
             self.update_stats()
             QMessageBox.information(
-                self,
-                'Deleted',
+                self, 'Deleted',
                 f'Task "{task.title}" has been deleted.'
             )
 
@@ -894,17 +928,12 @@ class MainWindow(QWidget):
             inputs = dialog.get_inputs()
 
             if not inputs["title"]:
-                QMessageBox.warning(
-                    self,
-                    'Missing Information',
-                    'Please provide a task title.'
-                )
+                QMessageBox.warning(self, 'Missing Information', 'Please provide a task title.')
                 return
 
             if len(inputs["title"]) > 100:
                 QMessageBox.warning(
-                    self,
-                    'Title Too Long',
+                    self, 'Title Too Long',
                     'Task title cannot exceed 100 characters.\n'
                     f'Current length: {len(inputs["title"])} characters.'
                 )
@@ -912,8 +941,7 @@ class MainWindow(QWidget):
 
             if len(inputs["title"]) < 3:
                 QMessageBox.warning(
-                    self,
-                    'Title Too Short',
+                    self, 'Title Too Short',
                     'Task title must be at least 3 characters long.'
                 )
                 return
@@ -933,8 +961,7 @@ class MainWindow(QWidget):
             self.update_stats()
 
             QMessageBox.information(
-                self,
-                'Success',
+                self, 'Success',
                 f'Task "{task.title}" has been created.'
             )
 
@@ -942,15 +969,13 @@ class MainWindow(QWidget):
         completed_count = self.todo_manager.completed_count
         if completed_count == 0:
             QMessageBox.information(
-                self,
-                'No Completed Tasks',
+                self, 'No Completed Tasks',
                 'There are no completed tasks to clear.'
             )
             return
 
         reply = QMessageBox.question(
-            self,
-            'Clear Completed Tasks',
+            self, 'Clear Completed Tasks',
             f'Clear {completed_count} completed task(s)?\nThis action cannot be undone.',
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
@@ -962,56 +987,75 @@ class MainWindow(QWidget):
             self.apply_filters()
             self.update_stats()
             QMessageBox.information(
-                self,
-                'Cleared',
+                self, 'Cleared',
                 f'{completed_count} completed task(s) have been cleared.'
             )
 
+    def focus_search(self):
+        self.search_input.setFocus()
+        self.search_input.selectAll()
+
+    def refresh_view(self):
+        self.todo_manager.load_data()
+        self.todo_manager.tasks = self.todo_manager.load_data()
+        self.all_tasks = list(self.todo_manager.tasks.values())
+        self.apply_filters()
+        self.update_stats()
+        self.status_bar.showMessage('View refreshed', 3000)
+
+    def get_selected_task_id(self) -> Optional[str]:
+        row = self.table_widget.currentRow()
+        if row < 0:
+            return None
+        item = self.table_widget.item(row, 0)
+        if item:
+            return item.data(Qt.UserRole)
+        return None
+
+    def edit_selected_task(self):
+        task_id = self.get_selected_task_id()
+        if not task_id:
+            self.status_bar.showMessage('No task selected', 2000)
+            return
+        self.edit_task_by_id(task_id)
+
+    def delete_selected_task(self):
+        task_id = self.get_selected_task_id()
+        if not task_id:
+            self.status_bar.showMessage('No task selected', 2000)
+            return
+        self.delete_task_by_id(task_id)
+
+    def toggle_selected_task(self):
+        task_id = self.get_selected_task_id()
+        if not task_id:
+            self.status_bar.showMessage('No task selected', 2000)
+            return
+        self.toggle_task_status_by_id(task_id)
+
+    def show_about_dialog(self):
+        dialog = AboutDialog(self)
+        dialog.exec_()
+
+    def show_help_dialog(self):
+        dialog = HelpDialog(self)
+        dialog.exec_()
+
+    def show_shortcuts_dialog(self):
+        dialog = ShortcutsDialog(self)
+        dialog.exec_()
+
+    def create_desktop_entry(self):
+        dialog = DesktopEntryDialog(self)
+        dialog.exec_()
+
     def show_help(self):
-        QMessageBox.information(
-            self,
-            'Smart Task Manager Help',
-            '<h3>Smart Task Manager v1.1.3</h3>'
-            '<p><b>Features:</b></p>'
-            '<ul>'
-            '<li>Create tasks with title, description, priority, and due date</li>'
-            '<li>Edit tasks at any time using the Edit button</li>'
-            '<li>Mark tasks as completed/pending with one click</li>'
-            '<li>View detailed task information</li>'
-            '<li>Right-click on tasks for context menu with quick actions</li>'
-            '<li>Delete individual tasks or clear all completed at once</li>'
-            '<li>Search tasks by text in title and description</li>'
-            '<li>Filter tasks by status (All/Pending/Completed)</li>'
-            '<li>Filter tasks by priority (High/Medium/Low)</li>'
-            '<li>Filter tasks by due date (All/Overdue/Today/Future)</li>'
-            '<li>Reset all filters with one click</li>'
-            '</ul>'
-            '<p><b>Quick Actions:</b></p>'
-            '<ul>'
-            '<li>Click the status button to toggle completion</li>'
-            '<li>Right-click any task for context menu</li>'
-            '<li>Use search box for instant filtering</li>'
-            '</ul>'
-            '<p><b>Priority levels:</b></p>'
-            '<ul>'
-            '<li>High - Urgent tasks (Red)</li>'
-            '<li>Medium - Important tasks (Yellow)</li>'
-            '<li>Low - Nice-to-have tasks (Green)</li>'
-            '</ul>'
-            '<p>Tasks are automatically saved to ~/.todos.json</p>'
-            '<hr>'
-            '<p><b>Links:</b></p>'
-            '<p>'
-            '<a href="https://github.com/smartlegionlab/smart-task-manager" style="color: #2a82da;">GitHub Repository</a><br>'
-            '<a href="https://github.com/smartlegionlab/smart-task-manager/issues" style="color: #2a82da;">Report Issues</a>'
-            '</p>'
-        )
+        self.show_help_dialog()
 
     def closeEvent(self, event):
         if self.todo_manager.count > 0:
             reply = QMessageBox.question(
-                self,
-                'Exit',
+                self, 'Exit',
                 f'You have {self.todo_manager.count} task(s) saved.\n'
                 f'Are you sure you want to exit?',
                 QMessageBox.Yes | QMessageBox.No,
