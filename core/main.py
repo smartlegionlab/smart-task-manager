@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
     QMenu, QAction, QDesktopWidget, QMainWindow, QStatusBar
 )
-from PyQt5.QtGui import QFont, QColor, QIcon
+from PyQt5.QtGui import QFont, QColor, QIcon, QKeySequence
 from PyQt5.QtCore import Qt, QDate
 
 from core.task import Task
@@ -251,6 +251,7 @@ class MainWindow(QMainWindow):
 
         if sys.platform.startswith('linux'):
             desktop_entry_action = QAction('Create Desktop Entry...', self)
+            desktop_entry_action.setShortcut(QKeySequence('Ctrl+Shift+D'))
             desktop_entry_action.triggered.connect(self.create_desktop_entry)
             file_menu.addAction(desktop_entry_action)
             file_menu.addSeparator()
@@ -263,6 +264,7 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
 
         clear_completed_action = QAction('Clear Completed', self)
+        clear_completed_action.setShortcut('Ctrl+Shift+C')
         clear_completed_action.triggered.connect(self.clear_completed)
         file_menu.addAction(clear_completed_action)
 
@@ -307,6 +309,7 @@ class MainWindow(QMainWindow):
         view_menu.addSeparator()
 
         reset_filters_action = QAction('Reset Filters', self)
+        reset_filters_action.setShortcut('Ctrl+R')
         reset_filters_action.triggered.connect(self.reset_filters)
         view_menu.addAction(reset_filters_action)
 
@@ -426,6 +429,8 @@ class MainWindow(QMainWindow):
         self.table_widget.customContextMenuRequested.connect(self.show_context_menu)
         self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         self.table_widget.setSelectionMode(QTableWidget.SingleSelection)
+        self.table_widget.cellDoubleClicked.connect(self.on_cell_double_clicked)
+        self.table_widget.installEventFilter(self)
         self.table_widget.setStyleSheet(
             "QTableWidget { background-color: #2a2a2a; gridline-color: #444; }"
             "QHeaderView::section { background-color: #353535; padding: 8px; "
@@ -478,6 +483,22 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.btn_exit)
 
         self.main_layout.addLayout(button_layout)
+
+    def eventFilter(self, obj, event):
+        if obj is self.table_widget and event.type() == event.KeyPress:
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                task_id = self.get_selected_task_id()
+                if task_id:
+                    self.view_task_by_id(task_id)
+                    return True
+        return super().eventFilter(obj, event)
+
+    def on_cell_double_clicked(self, row, column):
+        item = self.table_widget.item(row, 0)
+        if item:
+            task_id = item.data(Qt.UserRole)
+            if task_id:
+                self.view_task_by_id(task_id)
 
     def _init(self):
         self.all_tasks = list(self.todo_manager.tasks.values())
@@ -803,13 +824,10 @@ class MainWindow(QMainWindow):
         if row < 0:
             return
 
-        task_id = None
-        for col in [2, 4, 5, 6]:
-            widget = self.table_widget.cellWidget(row, col)
-            if widget and hasattr(widget, 'task_id'):
-                task_id = widget.task_id
-                break
-
+        item = self.table_widget.item(row, 0)
+        if not item:
+            return
+        task_id = item.data(Qt.UserRole)
         if not task_id:
             return
 

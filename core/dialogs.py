@@ -201,7 +201,7 @@ class HelpDialog(QDialog):
             "<li>Click <b>+ Add Task</b> or use <b>File -> New Task</b> (Ctrl+N).</li>"
             "<li>Fill in title (required), description, priority and due date.</li>"
             "<li>Click <b>Create Task</b>.</li>"
-            "<li>Use the status button on the row to mark a task complete or pending.</li>"
+            "<li>Double-click a row or press <b>Enter</b> to open task details.</li>"
             "</ol>"
         ))
 
@@ -209,7 +209,8 @@ class HelpDialog(QDialog):
             "TASKS",
             "<ul style='color: #ddd; margin: 0; padding-left: 18px;'>"
             "<li>Each task has: title, description, priority (High / Medium / Low), due date.</li>"
-            "<li>Toggle completion with the status button on the row, or via the context menu.</li>"
+            "<li>Toggle completion with the status button on the row, or press <b>Space</b>.</li>"
+            "<li>Double-click a row or press <b>Enter</b> to open details.</li>"
             "<li>Right-click a row for <b>View Details</b>, <b>Mark as Complete / Pending</b>, "
             "<b>Edit Task</b>, <b>Delete Task</b>.</li>"
             "<li>Overdue tasks are highlighted in red.</li>"
@@ -220,10 +221,10 @@ class HelpDialog(QDialog):
             "SEARCH AND FILTERS",
             "<ul style='color: #ddd; margin: 0; padding-left: 18px;'>"
             "<li><b>Search</b> filters by title and description.</li>"
-            "<li><b>Status</b> filters All / Pending / Completed.</li>"
-            "<li><b>Priority</b> toggles High / Medium / Low.</li>"
-            "<li><b>Due Date</b> filters All / Overdue / Today / Future.</li>"
-            "<li><b>Reset Filters</b> clears everything.</li>"
+            "<li><b>Status</b> combo: All / Pending / Completed.</li>"
+            "<li><b>Priority</b> combo: All / High / Medium / Low.</li>"
+            "<li><b>Due Date</b> combo: All / Overdue / Today / Future.</li>"
+            "<li><b>Reset</b> clears all filters.</li>"
             "</ul>"
         ))
 
@@ -242,11 +243,18 @@ class HelpDialog(QDialog):
             "KEYBOARD SHORTCUTS",
             "<table style='color: #ddd; font-size: 12px; border-collapse: collapse;'>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+N</code></td><td>New task</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Shift+D</code></td><td>Create desktop entry</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Shift+C</code></td><td>Clear completed</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+E</code></td><td>Edit selected task</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Delete</code></td><td>Delete selected task</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Space</code></td><td>Toggle selected task completion</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Enter</code></td><td>View selected task details</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+F</code></td><td>Focus search box</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+R</code></td><td>Reset filters</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>F5</code></td><td>Refresh view</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>F1</code></td><td>Open help</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+/</code></td><td>Keyboard shortcuts</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+A</code></td><td>Open about</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Q</code></td><td>Exit</td></tr>"
             "</table>"
         ))
@@ -325,7 +333,7 @@ class ShortcutsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Keyboard Shortcuts - Smart Task Manager")
         self.setMinimumWidth(560)
-        self.setMinimumHeight(520)
+        self.setMinimumHeight(560)
         self.setModal(True)
         self.setup_ui()
         self.center_dialog()
@@ -360,9 +368,18 @@ class ShortcutsDialog(QDialog):
         content_layout.setSpacing(14)
 
         content_layout.addWidget(self._make_section(
-            "TASKS",
+            "FILE",
             [
                 ("Ctrl+N", "New task"),
+                ("Ctrl+Shift+D", "Create desktop entry"),
+                ("Ctrl+Shift+C", "Clear completed tasks"),
+                ("Ctrl+Q", "Exit application"),
+            ]
+        ))
+
+        content_layout.addWidget(self._make_section(
+            "EDIT",
+            [
                 ("Ctrl+E", "Edit selected task"),
                 ("Delete", "Delete selected task"),
                 ("Space", "Toggle completion of selected task"),
@@ -373,8 +390,9 @@ class ShortcutsDialog(QDialog):
             "VIEW",
             [
                 ("Ctrl+F", "Focus search box"),
+                ("Ctrl+R", "Reset filters"),
                 ("F5", "Refresh view"),
-                ("Ctrl+/", "Show this dialog"),
+                ("Enter", "View selected task details"),
             ]
         ))
 
@@ -382,14 +400,8 @@ class ShortcutsDialog(QDialog):
             "HELP",
             [
                 ("F1", "Open help"),
+                ("Ctrl+/", "Show this dialog"),
                 ("Ctrl+A", "Open about"),
-            ]
-        ))
-
-        content_layout.addWidget(self._make_section(
-            "APPLICATION",
-            [
-                ("Ctrl+Q", "Exit application"),
             ]
         ))
 
@@ -439,7 +451,7 @@ class ShortcutsDialog(QDialog):
             row_layout.setSpacing(20)
 
             key_label = QLabel(key)
-            key_label.setFixedWidth(140)
+            key_label.setFixedWidth(150)
             key_label.setStyleSheet(
                 "color: #2ecc71; font-family: Consolas, monospace; "
                 "font-size: 12px; font-weight: bold;"

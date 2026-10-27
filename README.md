@@ -39,13 +39,14 @@ for personal productivity.
 - **Edit tasks** anytime with full detail modification
 - **View task details** in a dedicated dialog
 - **Delete tasks** individually or clear completed tasks in bulk
+- **Double-click** a task row or press **Enter** to open task details
 
 ### Priority System
 - **Three priority levels**: **High**, **Medium**, **Low**
 - **Color-coded visual indicators** for quick identification
 
 ### Task Status
-- **Toggle completion status** with one click
+- **Toggle completion status** with one click or `Space`
 - **Visual strikethrough** for completed tasks
 - **Overdue task highlighting** (red text for overdue items)
 
@@ -60,8 +61,9 @@ for personal productivity.
 - **Responsive table layout** with resizable columns
 - **Context menu** for quick actions (right-click on tasks)
 - **Task statistics** displayed in real-time
-- **Menu bar** (File / Edit / View / Help)
+- **Menu bar** (File / Edit / View / Help) with keyboard shortcuts
 - **Status bar** with live feedback
+- **Compact single-row filters** (search + status + priority + due date + reset)
 
 ### Additional Features
 - **Due date calendar picker** with visual date selection
@@ -195,7 +197,7 @@ rm -f ~/.todos.json
 
 ### Managing Tasks
 - **Toggle Completion**: Click the status button, or press `Space`
-- **View Details**: Click the "View" button
+- **View Details**: Double-click the row, press `Enter`, or click "View"
 - **Edit Task**: Click the "Edit" button, or press `Ctrl+E`
 - **Delete Task**: Click the "Delete" button, or press `Delete`
 
@@ -207,34 +209,38 @@ Right-click on any task in the table to access:
 - Delete Task
 
 ### Bulk Operations
-- **Clear Completed Tasks**: Click "Clear Completed" or use **File -> Clear Completed**
+- **Clear Completed Tasks**: Click "Clear Completed" or use **File -> Clear Completed** (`Ctrl+Shift+C`)
 - **Exit Confirmation**: Application warns if unsaved tasks exist on exit
 
 ---
 
 ## Menu Bar
 
-- **File**: Create Desktop Entry (Linux), New Task, Clear Completed, Exit
-- **Edit**: Edit Selected Task, Delete Selected Task, Toggle Completion
-- **View**: Focus Search, Refresh, Reset Filters
-- **Help**: Help, Keyboard Shortcuts, About
+- **File**: Create Desktop Entry (`Ctrl+Shift+D`, Linux only), New Task (`Ctrl+N`), Clear Completed (`Ctrl+Shift+C`), Exit (`Ctrl+Q`)
+- **Edit**: Edit Selected Task (`Ctrl+E`), Delete Selected Task (`Delete`), Toggle Completion (`Space`)
+- **View**: Focus Search (`Ctrl+F`), Refresh (`F5`), Reset Filters (`Ctrl+R`)
+- **Help**: Help (`F1`), Keyboard Shortcuts (`Ctrl+/`), About (`Ctrl+A`)
 
 ---
 
 ## Keyboard Shortcuts
 
-| Shortcut       | Action                          |
-|----------------|---------------------------------|
-| `Ctrl+N`       | New task                        |
-| `Ctrl+E`       | Edit selected task              |
-| `Delete`       | Delete selected task            |
-| `Space`        | Toggle completion of selection  |
-| `Ctrl+F`       | Focus search box                |
-| `F5`           | Refresh view                    |
-| `F1`           | Open help                       |
-| `Ctrl+/`       | Show keyboard shortcuts dialog  |
-| `Ctrl+A`       | Open about dialog               |
-| `Ctrl+Q`       | Exit application                |
+| Shortcut         | Action                              |
+|------------------|-------------------------------------|
+| `Ctrl+N`         | New task                            |
+| `Ctrl+Shift+D`   | Create desktop entry (Linux)        |
+| `Ctrl+Shift+C`   | Clear completed tasks               |
+| `Ctrl+Q`         | Exit application                    |
+| `Ctrl+E`         | Edit selected task                  |
+| `Delete`         | Delete selected task                |
+| `Space`          | Toggle completion of selection      |
+| `Enter`          | View details of selected task       |
+| `Ctrl+F`         | Focus search box                    |
+| `Ctrl+R`         | Reset filters                       |
+| `F5`             | Refresh view                        |
+| `F1`             | Open help                           |
+| `Ctrl+/`         | Show keyboard shortcuts dialog      |
+| `Ctrl+A`         | Open about dialog                   |
 
 ---
 
@@ -251,7 +257,7 @@ Right-click on any task in the table to access:
 
 The application allows you to create desktop entries directly from the menu:
 
-1. **Go to File -> Create Desktop Entry**
+1. **Go to File -> Create Desktop Entry** (`Ctrl+Shift+D`)
 2. **Choose locations:**
    - Application Menu (`~/.local/share/applications/`) - adds to system app menu
    - Desktop (`~/Desktop/`) - creates shortcut on desktop
@@ -296,7 +302,50 @@ Tasks are automatically saved to:
 
 ## Windows Standalone Executable
 
-(unchanged - see original README)
+### Creating a Single-File *.exe
+
+Build a standalone `smart_task_manager.exe` that runs without Python installation:
+
+#### Step 1: Get the Project Files
+1. **Download project ZIP:**
+   - Go to: https://github.com/smartlegionlab/smart-task-manager-master
+   - Click green "Code" button
+   - Select "Download ZIP"
+   - Extract to: `C:\smart-task-manager-master\`
+
+#### Step 2: Install Python
+1. Download Python installer from: https://python.org/downloads/
+2. Run installer
+3. **IMPORTANT:** Check "Add Python to PATH"
+4. Click "Install Now"
+
+#### Step 3: Open Command Prompt
+1. Press `Win + R`
+2. Type `cmd`, press Enter
+3. Navigate to project folder:
+   ```cmd
+   cd C:\smart-task-manager-master
+   ```
+
+#### Step 4: Create Virtual Environment
+```cmd
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+#### Step 5: Install Dependencies
+```cmd
+pip install pyinstaller
+pip install PyQt5==5.15.9
+```
+
+#### Step 6: Build Executable
+```cmd
+pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-hooks-dir=. app.py
+```
+
+#### Step 7: Find and Use
+**Location:** `C:\smart-task-manager-master\dist\smart_task_manager.exe`
 
 ---
 
@@ -308,7 +357,7 @@ Tasks are automatically saved to:
 - **View**: PyQt5-based GUI with dialog windows and table view
 
 ### Key Components
-- **MainWindow**: Primary application interface with menu bar, task table, status bar
+- **MainWindow**: Primary application interface with menu bar, filters, task table, status bar
 - **TaskInputDialog**: Modal dialog for creating/editing tasks
 - **TaskDisplayDialog**: Modal dialog for viewing task details
 - **AboutDialog**: Project information dialog
