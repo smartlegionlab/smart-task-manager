@@ -6,7 +6,8 @@ INSTALL_DIR="$HOME/.local/share/$APP_ID"
 APPS_DIR="$HOME/.local/share/applications"
 MENU_ENTRY="$APPS_DIR/$APP_ID.desktop"
 DESKTOP_FILE="$APP_ID.desktop"
-USER_DATA_FILE="$HOME/.todos.json"
+USER_DATA_DIR="$HOME/.smart_task_manager"
+USER_DATA_FILE="$USER_DATA_DIR/tasks.json"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -73,5 +74,5 @@ echo ""
 echo -e "${BOLD}${GREEN}  Uninstall complete${NC}"
 echo ""
 echo "  Kept: $USER_DATA_FILE"
-echo "  To delete tasks data too: rm -f $USER_DATA_FILE"
+echo "  To delete tasks data too: rm -rf $USER_DATA_DIR"
 echo ""

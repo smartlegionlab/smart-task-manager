@@ -33,7 +33,7 @@ class AboutDialog(QDialog):
         title_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(title_label)
 
-        version_label = QLabel("Version 1.2.1")
+        version_label = QLabel("Version 1.3.0")
         version_label.setStyleSheet("color: #5a5d65; font-size: 12px;")
         version_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(version_label)
@@ -62,7 +62,8 @@ class AboutDialog(QDialog):
             "<li>Tasks with title, description, priority and due date</li>"
             "<li>Three priority levels: High, Medium, Low</li>"
             "<li>Search and filters by status, priority and due date</li>"
-            "<li>Automatic saving to ~/.todos.json</li>"
+            "<li>Automatic saving to ~/.smart_task_manager/tasks.json</li>"
+            "<li>JSON export and import with confirmation</li>"
             "<li>Dark theme optimized for extended use</li>"
             "</ul>"
         ))
@@ -72,7 +73,7 @@ class AboutDialog(QDialog):
             "<p style='color: #ddd; margin: 0;'>"
             "All data stays on your machine. No cloud, no telemetry, no network access at runtime. "
             "Your tasks are stored in <code style='color: #2ecc71; background-color: #23262d; "
-            "padding: 2px 6px; border-radius: 3px;'>~/.todos.json</code>."
+            "padding: 2px 6px; border-radius: 3px;'>~/.smart_task_manager/tasks.json</code>."
             "</p>"
         ))
 
@@ -229,6 +230,18 @@ class HelpDialog(QDialog):
         ))
 
         content_layout.addWidget(self._make_section(
+            "IMPORT AND EXPORT",
+            "<ul style='color: #ddd; margin: 0; padding-left: 18px;'>"
+            "<li><b>File -> Export</b> (Ctrl+Shift+E) writes all tasks to a JSON file.</li>"
+            "<li><b>File -> Import</b> (Ctrl+I) replaces the current dataset with a JSON file. "
+            "<b>This overwrites all existing data.</b> A temporary backup of the current file "
+            "is created automatically before import.</li>"
+            "<li>The exported file includes a small <code>_export_info</code> marker that is "
+            "ignored on import.</li>"
+            "</ul>"
+        ))
+
+        content_layout.addWidget(self._make_section(
             "DESKTOP INTEGRATION (LINUX)",
             "<ul style='color: #ddd; margin: 0; padding-left: 18px;'>"
             "<li><b>File -> Create Desktop Entry</b> creates a launcher in the application menu "
@@ -243,6 +256,8 @@ class HelpDialog(QDialog):
             "KEYBOARD SHORTCUTS",
             "<table style='color: #ddd; font-size: 12px; border-collapse: collapse;'>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+N</code></td><td>New task</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+I</code></td><td>Import data</td></tr>"
+            "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Shift+E</code></td><td>Export data</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Shift+D</code></td><td>Create desktop entry</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+Shift+C</code></td><td>Clear completed</td></tr>"
             "<tr><td style='padding: 3px 16px 3px 0;'><code>Ctrl+E</code></td><td>Edit selected task</td></tr>"
@@ -263,8 +278,12 @@ class HelpDialog(QDialog):
             "DATA LOCATION",
             "<p style='color: #ddd; margin: 0;'>All data is stored locally:</p>"
             "<ul style='color: #ddd; margin: 6px 0 0 0; padding-left: 18px;'>"
-            "<li>Tasks: <code>~/.todos.json</code></li>"
+            "<li>Tasks: <code>~/.smart_task_manager/tasks.json</code></li>"
             "</ul>"
+            "<p style='color: #ddd; margin: 8px 0 0 0;'>"
+            "The uninstaller never touches your data. To remove it manually: "
+            "<code>rm -rf ~/.smart_task_manager</code>"
+            "</p>"
         ))
 
         content_layout.addStretch()
@@ -333,7 +352,7 @@ class ShortcutsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Keyboard Shortcuts - Smart Task Manager")
         self.setMinimumWidth(560)
-        self.setMinimumHeight(560)
+        self.setMinimumHeight(600)
         self.setModal(True)
         self.setup_ui()
         self.center_dialog()
@@ -371,6 +390,8 @@ class ShortcutsDialog(QDialog):
             "FILE",
             [
                 ("Ctrl+N", "New task"),
+                ("Ctrl+I", "Import data"),
+                ("Ctrl+Shift+E", "Export data"),
                 ("Ctrl+Shift+D", "Create desktop entry"),
                 ("Ctrl+Shift+C", "Clear completed tasks"),
                 ("Ctrl+Q", "Exit application"),

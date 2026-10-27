@@ -1,4 +1,4 @@
-# Smart Task Manager <sup>v1.2.0</sup>
+# Smart Task Manager <sup>v1.3.0</sup>
 
 A modern desktop task management application built with Python and PyQt5, featuring an
 intuitive dark theme interface, priority-based organization, and automatic data persistence.
@@ -51,9 +51,11 @@ for personal productivity.
 - **Overdue task highlighting** (red text for overdue items)
 
 ### Data Management
-- **Automatic saving** to `~/.todos.json`
+- **Automatic saving** to `~/.smart_task_manager/tasks.json`
 - **Persistent storage** between sessions
 - **JSON-based data format** for easy backup and migration
+- **JSON export** to any file
+- **JSON import** with automatic temporary backup before overwrite
 - **Statistics tracking** (total, completed, pending tasks)
 
 ### User Interface
@@ -164,12 +166,13 @@ curl -fsSL https://raw.githubusercontent.com/smartlegionlab/smart-task-manager/m
 - `~/Desktop/smart-task-manager.desktop` - the Desktop shortcut (if present)
 
 **What the uninstaller never touches:**
-- `~/.todos.json` - your tasks. It is your data. Only you decide what to do with it.
+- `~/.smart_task_manager/tasks.json` - your tasks. It is your data.
+  Only you decide what to do with it.
 
 If you want to remove your data as well, run after uninstall:
 
 ```bash
-rm -f ~/.todos.json
+rm -rf ~/.smart_task_manager
 ```
 
 ### Installation Paths
@@ -180,7 +183,7 @@ rm -f ~/.todos.json
 | Virtual environment        | `~/.local/share/smart-task-manager/venv/`                         |
 | Application menu entry     | `~/.local/share/applications/smart-task-manager.desktop`          |
 | Desktop shortcut (opt-in)  | `~/Desktop/smart-task-manager.desktop`                            |
-| User data (tasks)          | `~/.todos.json`                                                   |
+| User data (tasks)          | `~/.smart_task_manager/tasks.json`                                |
 
 ---
 
@@ -212,11 +215,17 @@ Right-click on any task in the table to access:
 - **Clear Completed Tasks**: Click "Clear Completed" or use **File -> Clear Completed** (`Ctrl+Shift+C`)
 - **Exit Confirmation**: Application warns if unsaved tasks exist on exit
 
+### Import and Export
+- **Export**: **File -> Export...** (`Ctrl+Shift+E`) writes all tasks to a JSON file.
+- **Import**: **File -> Import...** (`Ctrl+I`) replaces the current dataset with a JSON file.
+  A temporary backup of the current data file is created automatically before import.
+  Import is validated and rejected if the format does not match.
+
 ---
 
 ## Menu Bar
 
-- **File**: Create Desktop Entry (`Ctrl+Shift+D`, Linux only), New Task (`Ctrl+N`), Clear Completed (`Ctrl+Shift+C`), Exit (`Ctrl+Q`)
+- **File**: Create Desktop Entry (`Ctrl+Shift+D`, Linux only), New Task (`Ctrl+N`), Import (`Ctrl+I`), Export (`Ctrl+Shift+E`), Clear Completed (`Ctrl+Shift+C`), Exit (`Ctrl+Q`)
 - **Edit**: Edit Selected Task (`Ctrl+E`), Delete Selected Task (`Delete`), Toggle Completion (`Space`)
 - **View**: Focus Search (`Ctrl+F`), Refresh (`F5`), Reset Filters (`Ctrl+R`)
 - **Help**: Help (`F1`), Keyboard Shortcuts (`Ctrl+/`), About (`Ctrl+A`)
@@ -228,6 +237,8 @@ Right-click on any task in the table to access:
 | Shortcut         | Action                              |
 |------------------|-------------------------------------|
 | `Ctrl+N`         | New task                            |
+| `Ctrl+I`         | Import data                         |
+| `Ctrl+Shift+E`   | Export data                         |
 | `Ctrl+Shift+D`   | Create desktop entry (Linux)        |
 | `Ctrl+Shift+C`   | Clear completed tasks               |
 | `Ctrl+Q`         | Exit application                    |
@@ -276,8 +287,10 @@ The application allows you to create desktop entries directly from the menu:
 ### File Location
 Tasks are automatically saved to:
 ```
-~/.todos.json
+~/.smart_task_manager/tasks.json
 ```
+
+The folder `~/.smart_task_manager/` is created automatically on first run.
 
 ### Data Format
 ```json
@@ -295,7 +308,10 @@ Tasks are automatically saved to:
 ```
 
 ### Backup & Migration
-- Simply copy the `~/.todos.json` file to back up your tasks
+- Simply copy the `~/.smart_task_manager/tasks.json` file to back up your tasks
+- Use **File -> Export...** to write a JSON copy anywhere
+- Use **File -> Import...** to load a JSON file (overwrites current data,
+  temporary backup is created automatically)
 - The JSON format is human-readable and editable
 
 ---
@@ -305,6 +321,7 @@ Tasks are automatically saved to:
 ### Architecture
 - **Model**: `Task` class representing individual tasks
 - **Controller**: `TaskManager` handling data persistence and operations
+- **Service**: `ImportExportService` handling import/export with validation and backup
 - **View**: PyQt5-based GUI with dialog windows and table view
 
 ### Key Components
@@ -319,7 +336,7 @@ Tasks are automatically saved to:
 
 ### Dependencies
 - **PyQt5**: GUI framework
-- **Python Standard Library**: json, os, uuid, datetime, typing
+- **Python Standard Library**: json, os, shutil, tempfile, uuid, datetime, typing
 
 ---
 
@@ -340,13 +357,18 @@ Tasks are automatically saved to:
 
 2. **Application won't start**
    - Ensure Python 3.7+ is installed
-   - Check file permissions on `~/.todos.json`
+   - Check file permissions on `~/.smart_task_manager/tasks.json`
 
 3. **Tasks not saving**
    - Verify write permissions in home directory
    - Check disk space availability
 
-4. **UI elements look wrong**
+4. **Import fails**
+   - The file must be a JSON object where each value has `id` and `title`
+   - Export from Smart Task Manager always passes validation
+   - On failure, the current data file is restored from the temporary backup
+
+5. **UI elements look wrong**
    - Ensure all dependencies are installed
    - Try restarting the application
 

@@ -4,13 +4,22 @@ import os
 from typing import Dict, Optional
 
 from core.task import Task
+from core.import_export_service import ImportExportService
 
 
 class TaskManager:
 
-    def __init__(self, filename: str = '~/.todos.json'):
+    def __init__(self, filename: str = '~/.smart_task_manager/tasks.json'):
         self.filename = os.path.expanduser(filename)
+        self.ensure_data_file()
         self.tasks = self.load_data()
+
+    def ensure_data_file(self):
+        data_dir = os.path.dirname(self.filename)
+        os.makedirs(data_dir, exist_ok=True)
+        if not os.path.exists(self.filename):
+            with open(self.filename, 'w', encoding='utf-8') as f:
+                json.dump({}, f, indent=4, ensure_ascii=False)
 
     @property
     def count(self) -> int:
@@ -57,7 +66,8 @@ class TaskManager:
                 with open(self.filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     return {task_id: Task.from_dict(task_data)
-                            for task_id, task_data in data.items()}
+                            for task_id, task_data in data.items()
+                            if not task_id.startswith('_')}
             except (json.JSONDecodeError, IOError):
                 return {}
         else:
@@ -71,3 +81,12 @@ class TaskManager:
                       indent=4,
                       ensure_ascii=False,
                       sort_keys=True)
+
+    def export_data(self, export_path: str) -> Dict:
+        return ImportExportService.export_data(self.filename, export_path)
+
+    def import_data(self, import_path: str) -> Dict:
+        result = ImportExportService.import_data(self.filename, import_path)
+        if result.get('success'):
+            self.tasks = self.load_data()
+        return result

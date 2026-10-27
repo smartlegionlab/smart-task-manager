@@ -1,14 +1,16 @@
 # Copyright (©) 2025, Alexander Suvorov. All rights reserved.
+import os
 import sys
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QMessageBox,
     QLineEdit, QDialog, QTableWidget, QTableWidgetItem, QFrame,
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
-    QMenu, QAction, QDesktopWidget, QMainWindow, QStatusBar
+    QMenu, QAction, QDesktopWidget, QMainWindow, QStatusBar, QFileDialog
 )
 from PyQt5.QtGui import QFont, QColor, QIcon, QKeySequence
 from PyQt5.QtCore import Qt, QDate
@@ -227,7 +229,6 @@ class MainWindow(QMainWindow):
         self.center_window()
 
     def setup_icon(self):
-        from pathlib import Path
         project_root = Path(__file__).parent.parent
         for candidate in [
             project_root / "data" / "icons" / "icon.png",
@@ -260,6 +261,18 @@ class MainWindow(QMainWindow):
         new_task_action.setShortcut('Ctrl+N')
         new_task_action.triggered.connect(self.add_task)
         file_menu.addAction(new_task_action)
+
+        file_menu.addSeparator()
+
+        import_action = QAction('Import...', self)
+        import_action.setShortcut('Ctrl+I')
+        import_action.triggered.connect(self.import_data)
+        file_menu.addAction(import_action)
+
+        export_action = QAction('Export...', self)
+        export_action.setShortcut('Ctrl+Shift+E')
+        export_action.triggered.connect(self.export_data)
+        file_menu.addAction(export_action)
 
         file_menu.addSeparator()
 
@@ -927,6 +940,75 @@ class MainWindow(QMainWindow):
                 self, 'Cleared',
                 f'{completed_count} completed task(s) have been cleared.'
             )
+
+    def import_data(self):
+        home_dir = str(Path.home())
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Import Data", home_dir, "JSON Files (*.json);;All Files (*)"
+        )
+        if not file_path:
+            return
+
+        reply = QMessageBox.warning(
+            self, "Import Data",
+            "This will REPLACE all current data with imported data!\n\n"
+            "Current data will be lost. Are you sure?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        try:
+            result = self.todo_manager.import_data(file_path)
+
+            if not result.get('success'):
+                QMessageBox.critical(
+                    self, "Import Error",
+                    f"Import failed:\n\n{result.get('error', 'Unknown error')}"
+                )
+                return
+
+            self.all_tasks = list(self.todo_manager.tasks.values())
+            self.apply_filters()
+            self.update_stats()
+
+            items = result.get('imported_items', {})
+            message = "Import successful!\n\n"
+            message += f"Tasks: {items.get('tasks', 0)}\n"
+            QMessageBox.information(self, "Import Complete", message)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", f"Import failed:\n\n{str(e)}")
+
+    def export_data(self):
+        home_dir = str(Path.home())
+        default_file_name = os.path.join(
+            home_dir,
+            f"tasks_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Export Data", default_file_name, "JSON Files (*.json);;All Files (*)"
+        )
+        if not file_path:
+            return
+        if not file_path.endswith('.json'):
+            file_path += '.json'
+        try:
+            result = self.todo_manager.export_data(file_path)
+            if result['success']:
+                message = (
+                    f"Export successful!\n\n"
+                    f"File: {result['export_path']}\n"
+                    f"Size: {result['export_size'] / 1024:.1f} KB"
+                )
+                QMessageBox.information(self, "Export Complete", message)
+            else:
+                QMessageBox.critical(
+                    self, "Export Error",
+                    f"Export failed:\n\n{result.get('error', 'Unknown error')}"
+                )
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Export failed:\n\n{str(e)}")
 
     def focus_search(self):
         self.search_input.setFocus()

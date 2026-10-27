@@ -9,7 +9,8 @@ VENV_DIR="$INSTALL_DIR/venv"
 APPS_DIR="$HOME/.local/share/applications"
 MENU_ENTRY="$APPS_DIR/$APP_ID.desktop"
 DESKTOP_FILE="$APP_ID.desktop"
-USER_DATA_FILE="$HOME/.todos.json"
+USER_DATA_DIR="$HOME/.smart_task_manager"
+USER_DATA_FILE="$USER_DATA_DIR/tasks.json"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -42,7 +43,7 @@ echo "  5. Optionally create a shortcut on your Desktop"
 echo ""
 echo -e "Your data will be stored separately in:"
 echo -e "  ${BOLD}$USER_DATA_FILE${NC}"
-echo "  (that file is created by the app on first task save)"
+echo "  (that folder is created by the app on first run)"
 echo ""
 
 step "Checking Python..."
@@ -102,7 +103,7 @@ ICON_PATH="$INSTALL_DIR/data/icons/icon.png"
 [ -f "$ICON_PATH" ] || ICON_PATH="system-run"
 
 DESKTOP_CONTENT="[Desktop Entry]
-Version=1.2.0
+Version=1.3.0
 Type=Application
 Name=$APP_NAME
 Comment=Desktop task management application built with Python and PyQt5
@@ -144,7 +145,7 @@ echo ""
 echo "  Application:      $INSTALL_DIR"
 echo "  Virtual env:      $VENV_DIR"
 echo "  Menu entry:       $MENU_ENTRY"
-echo "  Your data file:   $USER_DATA_FILE"
+echo "  Your data folder: $USER_DATA_DIR"
 echo ""
 echo "  Launch: Application menu -> \"$APP_NAME\""
 echo ""
