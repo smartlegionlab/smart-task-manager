@@ -102,7 +102,7 @@ ICON_PATH="$INSTALL_DIR/data/icons/icon.png"
 [ -f "$ICON_PATH" ] || ICON_PATH="system-run"
 
 DESKTOP_CONTENT="[Desktop Entry]
-Version=1.1.3
+Version=1.2.0
 Type=Application
 Name=$APP_NAME
 Comment=Desktop task management application built with Python and PyQt5

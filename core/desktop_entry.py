@@ -192,7 +192,7 @@ class DesktopEntryDialog(QDialog):
 
         return (
             "[Desktop Entry]\n"
-            "Version=1.1.3\n"
+            "Version=1.2.0\n"
             "Type=Application\n"
             f"Name={self.app_name}\n"
             "Comment=Desktop task management application built with Python and PyQt5.\n"
