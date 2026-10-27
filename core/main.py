@@ -8,8 +8,7 @@ from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QMessageBox,
     QLineEdit, QDialog, QTableWidget, QTableWidgetItem, QFrame,
     QHeaderView, QHBoxLayout, QGroupBox, QTextEdit, QDateEdit, QComboBox,
-    QMenu, QAction, QGridLayout, QCheckBox, QRadioButton, QButtonGroup,
-    QDesktopWidget, QMainWindow, QStatusBar, QTabWidget, QTabBar
+    QMenu, QAction, QDesktopWidget, QMainWindow, QStatusBar
 )
 from PyQt5.QtGui import QFont, QColor, QIcon
 from PyQt5.QtCore import Qt, QDate
@@ -344,7 +343,7 @@ class MainWindow(QMainWindow):
         self.main_layout.setContentsMargins(20, 20, 20, 20)
 
         header_layout = QHBoxLayout()
-        self.label_logo = QLabel('Smart Task Manager <sup>v1.1.3</sup>')
+        self.label_logo = QLabel('Smart Task Manager')
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
@@ -360,18 +359,8 @@ class MainWindow(QMainWindow):
 
         self.main_layout.addLayout(header_layout)
 
-        search_group = QGroupBox("Search and Filters")
-        search_group.setStyleSheet(
-            "QGroupBox { font-weight: bold; border: 1px solid #444; "
-            "border-radius: 5px; margin-top: 10px; }"
-            "QGroupBox::title { subcontrol-origin: margin; left: 10px; "
-            "padding: 0 5px 0 5px; }"
-        )
-        search_layout = QGridLayout()
-        search_layout.setSpacing(10)
-
-        self.search_label = QLabel('Search:')
-        search_layout.addWidget(self.search_label, 0, 0)
+        filters_layout = QHBoxLayout()
+        filters_layout.setSpacing(10)
 
         self.search_input = QLineEdit(self)
         self.search_input.setPlaceholderText("Search in title and description...")
@@ -381,96 +370,51 @@ class MainWindow(QMainWindow):
             "background-color: #2a2a2a; color: white; }"
             "QLineEdit:focus { border: 1px solid #2a82da; }"
         )
-        search_layout.addWidget(self.search_input, 0, 1, 1, 3)
+        filters_layout.addWidget(self.search_input, 3)
 
-        self.status_label = QLabel('Status:')
-        search_layout.addWidget(self.status_label, 1, 0)
+        self.status_combo = QComboBox(self)
+        self.status_combo.addItems(["All", "Pending", "Completed"])
+        self.status_combo.currentIndexChanged.connect(self.apply_filters)
+        self.status_combo.setStyleSheet(
+            "QComboBox { padding: 6px 10px; border: 1px solid #555; border-radius: 4px; "
+            "background-color: #2a2a2a; color: white; min-width: 110px; }"
+            "QComboBox:hover { border: 1px solid #2a82da; }"
+        )
+        filters_layout.addWidget(QLabel("Status:"))
+        filters_layout.addWidget(self.status_combo)
 
-        self.status_all_radio = QRadioButton("All")
-        self.status_all_radio.setChecked(True)
-        self.status_pending_radio = QRadioButton("Pending")
-        self.status_completed_radio = QRadioButton("Completed")
+        self.priority_combo = QComboBox(self)
+        self.priority_combo.addItems(["All", "High", "Medium", "Low"])
+        self.priority_combo.currentIndexChanged.connect(self.apply_filters)
+        self.priority_combo.setStyleSheet(
+            "QComboBox { padding: 6px 10px; border: 1px solid #555; border-radius: 4px; "
+            "background-color: #2a2a2a; color: white; min-width: 110px; }"
+            "QComboBox:hover { border: 1px solid #2a82da; }"
+        )
+        filters_layout.addWidget(QLabel("Priority:"))
+        filters_layout.addWidget(self.priority_combo)
 
-        self.status_group = QButtonGroup(self)
-        self.status_group.addButton(self.status_all_radio)
-        self.status_group.addButton(self.status_pending_radio)
-        self.status_group.addButton(self.status_completed_radio)
+        self.date_combo = QComboBox(self)
+        self.date_combo.addItems(["All", "Overdue", "Today", "Future"])
+        self.date_combo.currentIndexChanged.connect(self.apply_filters)
+        self.date_combo.setStyleSheet(
+            "QComboBox { padding: 6px 10px; border: 1px solid #555; border-radius: 4px; "
+            "background-color: #2a2a2a; color: white; min-width: 110px; }"
+            "QComboBox:hover { border: 1px solid #2a82da; }"
+        )
+        filters_layout.addWidget(QLabel("Due Date:"))
+        filters_layout.addWidget(self.date_combo)
 
-        status_layout = QHBoxLayout()
-        status_layout.addWidget(self.status_all_radio)
-        status_layout.addWidget(self.status_pending_radio)
-        status_layout.addWidget(self.status_completed_radio)
-        status_layout.addStretch()
-
-        search_layout.addLayout(status_layout, 1, 1, 1, 3)
-
-        self.priority_label = QLabel('Priority:')
-        search_layout.addWidget(self.priority_label, 2, 0)
-
-        self.priority_high_check = QCheckBox("High")
-        self.priority_medium_check = QCheckBox("Medium")
-        self.priority_low_check = QCheckBox("Low")
-
-        self.priority_high_check.setChecked(True)
-        self.priority_medium_check.setChecked(True)
-        self.priority_low_check.setChecked(True)
-
-        priority_layout = QHBoxLayout()
-        priority_layout.addWidget(self.priority_high_check)
-        priority_layout.addWidget(self.priority_medium_check)
-        priority_layout.addWidget(self.priority_low_check)
-        priority_layout.addStretch()
-
-        search_layout.addLayout(priority_layout, 2, 1, 1, 3)
-
-        self.date_label = QLabel('Due Date:')
-        search_layout.addWidget(self.date_label, 3, 0)
-
-        self.date_all_radio = QRadioButton("All")
-        self.date_all_radio.setChecked(True)
-        self.date_overdue_radio = QRadioButton("Overdue")
-        self.date_today_radio = QRadioButton("Today")
-        self.date_future_radio = QRadioButton("Future")
-
-        self.date_group = QButtonGroup(self)
-        self.date_group.addButton(self.date_all_radio)
-        self.date_group.addButton(self.date_overdue_radio)
-        self.date_group.addButton(self.date_today_radio)
-        self.date_group.addButton(self.date_future_radio)
-
-        date_layout = QHBoxLayout()
-        date_layout.addWidget(self.date_all_radio)
-        date_layout.addWidget(self.date_overdue_radio)
-        date_layout.addWidget(self.date_today_radio)
-        date_layout.addWidget(self.date_future_radio)
-        date_layout.addStretch()
-
-        search_layout.addLayout(date_layout, 3, 1, 1, 3)
-
-        self.reset_filters_btn = QPushButton("Reset Filters")
+        self.reset_filters_btn = QPushButton("Reset")
         self.reset_filters_btn.clicked.connect(self.reset_filters)
         self.reset_filters_btn.setStyleSheet(
             "QPushButton { background-color: #555; color: white; border-radius: 4px; "
-            "padding: 6px 12px; font-weight: bold; }"
+            "padding: 6px 14px; font-weight: bold; }"
             "QPushButton:hover { background-color: #666; }"
         )
-        search_layout.addWidget(self.reset_filters_btn, 4, 3)
+        filters_layout.addWidget(self.reset_filters_btn)
 
-        self.status_all_radio.toggled.connect(self.apply_filters)
-        self.status_pending_radio.toggled.connect(self.apply_filters)
-        self.status_completed_radio.toggled.connect(self.apply_filters)
-
-        self.priority_high_check.stateChanged.connect(self.apply_filters)
-        self.priority_medium_check.stateChanged.connect(self.apply_filters)
-        self.priority_low_check.stateChanged.connect(self.apply_filters)
-
-        self.date_all_radio.toggled.connect(self.apply_filters)
-        self.date_overdue_radio.toggled.connect(self.apply_filters)
-        self.date_today_radio.toggled.connect(self.apply_filters)
-        self.date_future_radio.toggled.connect(self.apply_filters)
-
-        search_group.setLayout(search_layout)
-        self.main_layout.addWidget(search_group)
+        self.main_layout.addLayout(filters_layout)
 
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(7)
@@ -534,29 +478,6 @@ class MainWindow(QMainWindow):
         button_layout.addWidget(self.btn_exit)
 
         self.main_layout.addLayout(button_layout)
-
-        self.line = QFrame()
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
-        self.line.setStyleSheet("color: #444;")
-        self.main_layout.addWidget(self.line)
-
-        footer_layout = QVBoxLayout()
-        footer_layout.setSpacing(5)
-
-        copyright_text = (
-            'Copyright © 2025, '
-            '<a href="https://github.com/smartlegionlab" '
-            'style="color: #2a82da; text-decoration: none;">Alexander Suvorov</a>. '
-            'All rights reserved.'
-        )
-        self.copyright_label = QLabel(copyright_text)
-        self.copyright_label.setAlignment(Qt.AlignCenter)
-        self.copyright_label.setStyleSheet("color: #888; font-size: 16px;")
-        self.copyright_label.setOpenExternalLinks(True)
-        footer_layout.addWidget(self.copyright_label)
-
-        self.main_layout.addLayout(footer_layout)
 
     def _init(self):
         self.all_tasks = list(self.todo_manager.tasks.values())
@@ -659,21 +580,21 @@ class MainWindow(QMainWindow):
     def apply_filters(self):
         search_text = self.search_input.text().lower()
 
-        if self.status_pending_radio.isChecked():
+        status_index = self.status_combo.currentIndex()
+        if status_index == 1:
             status_filter = "pending"
-        elif self.status_completed_radio.isChecked():
+        elif status_index == 2:
             status_filter = "completed"
         else:
             status_filter = "all"
 
-        selected_priorities = []
-        if self.priority_high_check.isChecked():
-            selected_priorities.append(1)
-        if self.priority_medium_check.isChecked():
-            selected_priorities.append(2)
-        if self.priority_low_check.isChecked():
-            selected_priorities.append(3)
+        priority_index = self.priority_combo.currentIndex()
+        if priority_index == 0:
+            selected_priorities = [1, 2, 3]
+        else:
+            selected_priorities = [priority_index]
 
+        date_index = self.date_combo.currentIndex()
         today = datetime.now().date()
 
         filtered_tasks = []
@@ -694,17 +615,19 @@ class MainWindow(QMainWindow):
             if task.due_date:
                 try:
                     due_date = datetime.fromisoformat(task.due_date).date()
-                    if self.date_overdue_radio.isChecked():
+                    if date_index == 1:
                         if not (due_date < today and not task.completed):
                             continue
-                    elif self.date_today_radio.isChecked():
+                    elif date_index == 2:
                         if not (due_date == today):
                             continue
-                    elif self.date_future_radio.isChecked():
+                    elif date_index == 3:
                         if not (due_date > today):
                             continue
                 except ValueError:
                     pass
+            elif date_index in (1, 2, 3):
+                continue
 
             filtered_tasks.append(task)
 
@@ -714,13 +637,9 @@ class MainWindow(QMainWindow):
 
     def reset_filters(self):
         self.search_input.clear()
-        self.status_all_radio.setChecked(True)
-
-        self.priority_high_check.setChecked(True)
-        self.priority_medium_check.setChecked(True)
-        self.priority_low_check.setChecked(True)
-
-        self.date_all_radio.setChecked(True)
+        self.status_combo.setCurrentIndex(0)
+        self.priority_combo.setCurrentIndex(0)
+        self.date_combo.setCurrentIndex(0)
         self.apply_filters()
 
     def refresh_task_row(self, task: Task):
@@ -996,7 +915,6 @@ class MainWindow(QMainWindow):
         self.search_input.selectAll()
 
     def refresh_view(self):
-        self.todo_manager.load_data()
         self.todo_manager.tasks = self.todo_manager.load_data()
         self.all_tasks = list(self.todo_manager.tasks.values())
         self.apply_filters()
