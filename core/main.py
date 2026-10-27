@@ -153,13 +153,13 @@ class TaskDisplayDialog(QDialog):
 
         meta_layout = QHBoxLayout()
 
-        priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
+        priority_text = ["High", "Medium", "Low"][task.priority - 1]
         priority_label = QLabel(f'<b>Priority:</b> {priority_text}')
         meta_layout.addWidget(priority_label)
 
         meta_layout.addStretch()
 
-        status_text = "✅ Completed" if task.completed else "⏳ Pending"
+        status_text = "Completed" if task.completed else "Pending"
         status_label = QLabel(f'<b>Status:</b> {status_text}')
         meta_layout.addWidget(status_label)
 
@@ -182,7 +182,7 @@ class TaskDisplayDialog(QDialog):
 
         button_layout = QHBoxLayout()
 
-        self.edit_button = QPushButton('✏️ Edit Task', self)
+        self.edit_button = QPushButton('Edit Task', self)
         self.edit_button.setStyleSheet("""
             QPushButton {
                 background-color: #ff9800;
@@ -216,7 +216,7 @@ class TaskDisplayDialog(QDialog):
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Smart Task Manager v1.1.3')
+        self.setWindowTitle('Smart Task Manager')
         self.resize(1000, 700)
 
         self.todo_manager = TaskManager()
@@ -260,7 +260,7 @@ class MainWindow(QWidget):
         search_layout = QGridLayout()
         search_layout.setSpacing(10)
 
-        self.search_label = QLabel('🔍 Search:')
+        self.search_label = QLabel('Search:')
         search_layout.addWidget(self.search_label, 0, 0)
 
         self.search_input = QLineEdit(self)
@@ -285,8 +285,8 @@ class MainWindow(QWidget):
 
         self.status_all_radio = QRadioButton("All")
         self.status_all_radio.setChecked(True)
-        self.status_pending_radio = QRadioButton("⏳ Pending")
-        self.status_completed_radio = QRadioButton("✅ Completed")
+        self.status_pending_radio = QRadioButton("Pending")
+        self.status_completed_radio = QRadioButton("Completed")
 
         self.status_group = QButtonGroup(self)
         self.status_group.addButton(self.status_all_radio)
@@ -304,9 +304,9 @@ class MainWindow(QWidget):
         self.priority_label = QLabel('Priority:')
         search_layout.addWidget(self.priority_label, 2, 0)
 
-        self.priority_high_check = QCheckBox("🚨 High")
-        self.priority_medium_check = QCheckBox("⚠️ Medium")
-        self.priority_low_check = QCheckBox("📋 Low")
+        self.priority_high_check = QCheckBox("High")
+        self.priority_medium_check = QCheckBox("Medium")
+        self.priority_low_check = QCheckBox("Low")
 
         self.priority_high_check.setChecked(True)
         self.priority_medium_check.setChecked(True)
@@ -510,7 +510,7 @@ class MainWindow(QWidget):
             title_item.setFont(font)
         self.table_widget.setItem(row_position, 0, title_item)
 
-        priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
+        priority_text = ["High", "Medium", "Low"][task.priority - 1]
         priority_label = QLabel(priority_text)
         priority_label.setAlignment(Qt.AlignCenter)
         if task.priority == 1:
@@ -529,7 +529,7 @@ class MainWindow(QWidget):
 
         self.table_widget.setCellWidget(row_position, 1, priority_widget)
 
-        status_button = QPushButton("✅ Completed" if task.completed else "⏳ Pending")
+        status_button = QPushButton("Completed" if task.completed else "Pending")
         status_button.setCheckable(True)
         status_button.setChecked(task.completed)
         status_button.setStyleSheet("""
@@ -562,7 +562,7 @@ class MainWindow(QWidget):
 
         self.table_widget.setItem(row_position, 3, due_item)
 
-        view_button = QPushButton("👁 View")
+        view_button = QPushButton("View")
         view_button.setStyleSheet("""
             QPushButton {
                 background-color: #2a82da;
@@ -579,7 +579,7 @@ class MainWindow(QWidget):
         view_button.task_id = task.id
         self.table_widget.setCellWidget(row_position, 4, view_button)
 
-        edit_button = QPushButton("✏️ Edit")
+        edit_button = QPushButton("Edit")
         edit_button.setStyleSheet("""
             QPushButton {
                 background-color: #ff9800;
@@ -703,7 +703,7 @@ class MainWindow(QWidget):
                             font.setStrikeOut(False)
                             title_item.setFont(font)
 
-                    priority_text = ["🚨 High", "⚠️ Medium", "📋 Low"][task.priority - 1]
+                    priority_text = ["High", "Medium", "Low"][task.priority - 1]
                     priority_widget = self.table_widget.cellWidget(row, 1)
                     if priority_widget:
                         priority_label = priority_widget.findChild(QLabel)
@@ -718,7 +718,7 @@ class MainWindow(QWidget):
 
                     status_button = self.table_widget.cellWidget(row, 2)
                     if isinstance(status_button, QPushButton):
-                        status_button.setText("✅ Completed" if task.completed else "⏳ Pending")
+                        status_button.setText("Completed" if task.completed else "Pending")
                         status_button.setChecked(task.completed)
 
                     due_text = task.due_date if task.due_date else "No due date"
@@ -866,23 +866,23 @@ class MainWindow(QWidget):
 
         menu = QMenu()
 
-        view_action = QAction("👁 View Details")
+        view_action = QAction("View Details")
         view_action.triggered.connect(lambda: self.view_task_by_id(task_id))
         menu.addAction(view_action)
 
-        mark_complete_action = QAction("✅ Mark as Complete" if not task.completed else "⏳ Mark as Pending")
+        mark_complete_action = QAction("Mark as Complete" if not task.completed else "Mark as Pending")
         mark_complete_action.triggered.connect(lambda: self.toggle_task_status_by_id(task_id))
         menu.addAction(mark_complete_action)
 
         menu.addSeparator()
 
-        edit_action = QAction("✏️ Edit Task")
+        edit_action = QAction("Edit Task")
         edit_action.triggered.connect(lambda: self.edit_task_by_id(task_id))
         menu.addAction(edit_action)
 
         menu.addSeparator()
 
-        delete_action = QAction("🗑️ Delete Task")
+        delete_action = QAction("Delete Task")
         delete_action.triggered.connect(lambda: self.delete_task_by_id(task_id))
         menu.addAction(delete_action)
 
@@ -994,16 +994,16 @@ class MainWindow(QWidget):
             '</ul>'
             '<p><b>Priority levels:</b></p>'
             '<ul>'
-            '<li>🚨 High - Urgent tasks (Red)</li>'
-            '<li>⚠️ Medium - Important tasks (Yellow)</li>'
-            '<li>📋 Low - Nice-to-have tasks (Green)</li>'
+            '<li>High - Urgent tasks (Red)</li>'
+            '<li>Medium - Important tasks (Yellow)</li>'
+            '<li>Low - Nice-to-have tasks (Green)</li>'
             '</ul>'
             '<p>Tasks are automatically saved to ~/.todos.json</p>'
             '<hr>'
             '<p><b>Links:</b></p>'
             '<p>'
-            '📂 <a href="https://github.com/smartlegionlab/smart-task-manager" style="color: #2a82da;">GitHub Repository</a><br>'
-            '🐛 <a href="https://github.com/smartlegionlab/smart-task-manager/issues" style="color: #2a82da;">Report Issues</a>'
+            '<a href="https://github.com/smartlegionlab/smart-task-manager" style="color: #2a82da;">GitHub Repository</a><br>'
+            '<a href="https://github.com/smartlegionlab/smart-task-manager/issues" style="color: #2a82da;">Report Issues</a>'
             '</p>'
         )
 

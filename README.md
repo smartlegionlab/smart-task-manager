@@ -21,7 +21,7 @@ priority management, due date tracking, and automatic saving, it's the perfect t
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **By using this software, you agree to the full disclaimer terms.**
 
@@ -112,10 +112,10 @@ git clone https://github.com/smartlegionlab/smart-task-manager.git && cd smart-t
 3. Click **"Create Task"**
 
 ### Managing Tasks
-- **Toggle Completion**: Click the status button (⏳/✅)
-- **View Details**: Click the "👁 View" button
-- **Edit Task**: Click the "✏️ Edit" button
-- **Delete Task**: Click the "🗑️" button
+- **Toggle Completion**: Click the status button
+- **View Details**: Click the "View" button
+- **Edit Task**: Click the "Edit" button
+- **Delete Task**: Click the "Delete" button
 
 ### Quick Actions (Context Menu)
 Right-click on any task in the table to access:
@@ -125,7 +125,7 @@ Right-click on any task in the table to access:
 - Delete Task
 
 ### Bulk Operations
-- **Clear Completed Tasks**: Click "🗑️ Clear Completed" to remove all completed tasks
+- **Clear Completed Tasks**: Click "Clear Completed" to remove all completed tasks
 - **Exit Confirmation**: Application warns if unsaved tasks exist on exit
 
 ---
