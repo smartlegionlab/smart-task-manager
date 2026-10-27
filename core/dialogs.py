@@ -33,7 +33,7 @@ class AboutDialog(QDialog):
         title_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(title_label)
 
-        version_label = QLabel("Version 1.2.0")
+        version_label = QLabel("Version 1.2.1")
         version_label.setStyleSheet("color: #5a5d65; font-size: 12px;")
         version_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(version_label)

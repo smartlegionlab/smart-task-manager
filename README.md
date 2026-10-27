@@ -92,7 +92,7 @@ cd smart-task-manager
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python task_manager.py
+python app.py
 ```
 
 ### Option 2 - Install System-Wide (recommended)
@@ -297,55 +297,6 @@ Tasks are automatically saved to:
 ### Backup & Migration
 - Simply copy the `~/.todos.json` file to back up your tasks
 - The JSON format is human-readable and editable
-
----
-
-## Windows Standalone Executable
-
-### Creating a Single-File *.exe
-
-Build a standalone `smart_task_manager.exe` that runs without Python installation:
-
-#### Step 1: Get the Project Files
-1. **Download project ZIP:**
-   - Go to: https://github.com/smartlegionlab/smart-task-manager-master
-   - Click green "Code" button
-   - Select "Download ZIP"
-   - Extract to: `C:\smart-task-manager-master\`
-
-#### Step 2: Install Python
-1. Download Python installer from: https://python.org/downloads/
-2. Run installer
-3. **IMPORTANT:** Check "Add Python to PATH"
-4. Click "Install Now"
-
-#### Step 3: Open Command Prompt
-1. Press `Win + R`
-2. Type `cmd`, press Enter
-3. Navigate to project folder:
-   ```cmd
-   cd C:\smart-task-manager-master
-   ```
-
-#### Step 4: Create Virtual Environment
-```cmd
-python -m venv venv
-.\venv\Scripts\activate
-```
-
-#### Step 5: Install Dependencies
-```cmd
-pip install pyinstaller
-pip install PyQt5==5.15.9
-```
-
-#### Step 6: Build Executable
-```cmd
-pyinstaller --onefile --windowed --name "smart_task_manager.exe" --additional-hooks-dir=. app.py
-```
-
-#### Step 7: Find and Use
-**Location:** `C:\smart-task-manager-master\dist\smart_task_manager.exe`
 
 ---
 
